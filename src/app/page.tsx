@@ -8,7 +8,7 @@ const ACCENT = '#820ad1'
 const BG = '#000000'
 
 const VALID_KEYS = [
-  "aura", "K1NG", "NUBANK-MOD", "123456", "MAJESTIC-PRO", "CLISHA-091", 
+  "aura2", "esterco", "NUBANK-MOD", "123456", "MAJESTIC-PRO", "CLISHA-091", 
   "NU-FAST-01", "NU-FAST-02", "NU-FAST-03", "MAJ-PRO-X1", "MAJ-PRO-X2", 
   "MAJ-PRO-X3", "SAFE-INJ-77", "SAFE-INJ-88", "SAFE-INJ-99", "VIP-BLOCK-0", 
   "VIP-BLOCK-1", "VIP-BLOCK-2", "GOLD-NU-55", "SILVER-NU-44", "SHIELD-99", 

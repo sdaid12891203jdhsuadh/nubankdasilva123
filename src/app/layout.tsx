@@ -76,8 +76,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
-        <title>Nubank</title>
-        <meta name="description" content="Nubank" />
+        <title>Portal</title>
+        <meta name="description" content="Portal-Afiliados" />
         <meta name="robots" content="index, follow" />
       </head>
 

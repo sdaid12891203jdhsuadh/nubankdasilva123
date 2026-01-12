@@ -7,8 +7,9 @@ type Device = 'android' | 'ios'
 const ACCENT = '#820ad1'
 const BG = '#000000'
 
+// LISTA COMPLETA DE KEYS ORIGINAIS + K1NG
 const VALID_KEYS = [
-  "aura2", "esterco", "NUBANK-MOD", "123456", "MAJESTIC-PRO", "CLISHA-091", 
+  "aura2", "NUBANK-MOD", "123456", "MAJESTIC-PRO", "CLISHA-091", 
   "NU-FAST-01", "NU-FAST-02", "NU-FAST-03", "MAJ-PRO-X1", "MAJ-PRO-X2", 
   "MAJ-PRO-X3", "SAFE-INJ-77", "SAFE-INJ-88", "SAFE-INJ-99", "VIP-BLOCK-0", 
   "VIP-BLOCK-1", "VIP-BLOCK-2", "GOLD-NU-55", "SILVER-NU-44", "SHIELD-99", 
@@ -46,12 +47,28 @@ export default function Page() {
     { label: 'DPI', value: 590 },
   ], [])
 
+  // LÓGICA DE LOGIN COM TRAVA DE HARDWARE (HWID)
   function handleLogin() {
-    const val = key.trim()
-    if (!VALID_KEYS.includes(val) && !VALID_KEYS.includes(val.toUpperCase())) {
-      alert('Erro de autenticação: Esta KEY não está vinculada.')
-      return
+    const val = key.trim().toUpperCase();
+    
+    if (!VALID_KEYS.includes(val)) {
+      alert('Erro de autenticação: Esta KEY não está vinculada.');
+      return;
     }
+
+    // Geração de HWID simples baseado no navegador
+    const currentHwid = btoa(navigator.userAgent).substring(10, 22);
+    const storedHwid = localStorage.getItem(`hwid_${val}`);
+
+    if (storedHwid && storedHwid !== currentHwid) {
+      alert('ACESSO NEGADO: Key já vinculada a outro dispositivo (Security HWID).');
+      return;
+    }
+
+    if (!storedHwid) {
+      localStorage.setItem(`hwid_${val}`, currentHwid);
+    }
+
     setStage('loading')
     setTimeout(() => setStage('app'), 1500)
   }
@@ -59,9 +76,10 @@ export default function Page() {
   async function runLogs() {
     const messages = [
       "> [SISTEMA] Iniciando protocolo...",
-      `> [AUTH] Key validada: ${key.toUpperCase()}`,
-      "> [BYPASS] Desativando detecção...",
-      "> [SUCCESS] Injeção aplicada!"
+      `> [AUTH] HWID Verificado: OK`,
+      `> [DATA] Sincronizando scripts com a Key...`,
+      "> [BYPASS] Desativando detecção nativa...",
+      "> [SUCCESS] Injeção aplicada com sucesso!"
     ]
     for (const msg of messages) {
       setLogs(prev => [...prev, msg])
@@ -77,6 +95,8 @@ export default function Page() {
     setTimeout(() => {
       setInjecting(false)
       setShowResult(true)
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100])
+      
       setTimeout(() => {
         window.location.href = device === 'android' 
           ? 'intent://#Intent;package=com.dts.freefireth;scheme=android-app;end'
@@ -90,38 +110,34 @@ export default function Page() {
       style={{ 
         background: BG, 
         fontFamily: '-apple-system, system-ui, sans-serif',
-        touchAction: 'none' // Impede o "puxar para baixo" no iOS
+        touchAction: 'none' 
       }}>
       
-      {/* Correção do topo branco e comportamento de puxar */}
       <style jsx global>{`
         html, body {
           background-color: #000000 !important;
-          margin: 0;
-          padding: 0;
+          margin: 0; padding: 0;
           overflow: hidden;
           position: fixed;
-          width: 100%;
-          height: 100%;
-          -webkit-overflow-scrolling: touch;
+          width: 100%; height: 100%;
         }
       `}</style>
 
-      {/* Botão Pânico */}
+      {/* BOTÃO PÂNICO - REDIRECIONA PARA SITE REAL */}
       <button onClick={() => window.location.replace("https://www.nubank.com.br")} 
-        className="absolute right-5 top-12 z-[20000] grid h-[35px] w-[35px] place-items-center rounded-full border bg-white/5 border-white/10">
+        className="absolute right-5 top-14 z-[20000] grid h-[35px] w-[35px] place-items-center rounded-full border bg-white/5 border-white/10 active:scale-90 transition-transform">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
       </button>
 
       {stage === 'login' && (
-        <div className="flex-1 flex flex-col px-6 pb-8 pt-20 animate-in fade-in duration-500">
+        <div className="flex-1 flex flex-col px-6 pb-12 pt-24 animate-in fade-in duration-500">
           <img src="https://logodownload.org/wp-content/uploads/2019/08/nubank-logo-3.png" alt="Nu" style={{ width: 45, marginBottom: 40, filter: 'brightness(10)' }} />
           <h1 className="mb-9 text-[26px] font-medium leading-tight">Olá, qual é o seu CPF?</h1>
           <div className="mb-1 text-[13px] font-medium" style={{ color: ACCENT }}>CPF</div>
           <div className="mb-6 border-b-[1.5px]" style={{ borderColor: ACCENT }}>
             <input value={key} onChange={(e) => setKey(e.target.value)} placeholder="000.000.000-00" className="w-full bg-transparent py-2 text-[18px] outline-none" />
           </div>
-          <button onClick={handleLogin} className="mt-auto w-full rounded-full py-[18px] font-semibold" style={{ background: ACCENT }}>Continuar</button>
+          <button onClick={handleLogin} className="mt-auto w-full rounded-full py-[18px] font-semibold active:scale-95 transition-transform" style={{ background: ACCENT }}>Continuar</button>
         </div>
       )}
 
@@ -130,15 +146,15 @@ export default function Page() {
       )}
 
       {stage === 'app' && (
-        <div className="flex-1 flex flex-col px-5 pb-10 pt-20 overflow-y-auto">
+        <div className="flex-1 flex flex-col px-5 pb-10 pt-24 overflow-y-auto">
           <div className="mb-7">
             <div className="text-[18px] font-semibold">Painel Majestic</div>
-            <div className="text-[12px] text-white/50 italic">Conexão segura ativa</div>
+            <div className="text-[12px] text-white/50 italic">Hardware ID: Conectado</div>
           </div>
 
           <div className="mb-6 flex gap-1 rounded-xl border p-1 bg-[#111] border-[#222]">
             <button onClick={() => setDevice('android')} className={cn('flex-1 rounded-[10px] py-2 text-[12px] font-semibold', device === 'android' ? 'bg-[#222] text-[#820ad1]' : 'text-white/35')}>ANDROID</button>
-            <button onClick={() => setDevice('ios')} className={cn('flex-1 rounded-[10px] py-2 text-[12px] font-semibold', device === 'ios' ? 'bg-[#222] text-[#820ad1]' : 'text-white/35')}>iOS</button>
+            <button onClick={() => setDevice('ios')} className={cn('flex-1 rounded-[10px] py-2 text-[12px] font-semibold', device === 'ios' ? 'bg-[#222] text-[#820ad1]' : 'text-white/35')}>iOS (iPhone)</button>
           </div>
 
           <div className="mb-5 rounded-2xl border p-5 bg-[#111] border-[#1a1a1a]">
@@ -150,16 +166,17 @@ export default function Page() {
 
           {(injecting || logs.length > 0) && (
             <div className="mb-5 rounded-lg bg-black/80 p-3 font-mono text-[10px] text-green-500 border border-green-500/20">
-              {logs.map((log, i) => <div key={i}>{log}</div>)}
+              {logs.map((log, i) => <div key={i} className="animate-pulse">{log}</div>)}
             </div>
           )}
 
-          <button onClick={handleApply} disabled={injecting} className="w-full rounded-full py-[18px] font-semibold" style={{ background: ACCENT, opacity: injecting ? 0.6 : 1 }}>
+          <button onClick={handleApply} disabled={injecting} className="w-full rounded-full py-[18px] font-semibold transition-all active:scale-95" style={{ background: ACCENT, opacity: injecting ? 0.6 : 1 }}>
             {injecting ? 'INJETANDO...' : showResult ? 'SUCESSO!' : 'Autorizar e Injetar'}
           </button>
 
           {showResult && (
-            <div className="mt-4 rounded-2xl border p-4 bg-[#111] border-[#820ad1]">
+            <div className="mt-4 rounded-2xl border p-4 bg-[#111] border-[#820ad1] animate-in zoom-in-95">
+              <div className="mb-2 text-[11px] font-bold text-center text-[#820ad1] uppercase tracking-widest">Configuração Aplicada</div>
               {configResult.map((item) => (
                 <div key={item.label} className="flex justify-between border-b border-[#222] py-1 text-[13px] text-[#888]">
                   <span>{item.label}</span><b className="text-white">{item.value}</b>

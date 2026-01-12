@@ -1,145 +1,141 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const SPOTIFY_GREEN = '#1DB954'
-const BG_GRADIENT = 'linear-gradient(180deg, #121212 0%, #000000 100%)'
+const SPOTIFY_LOGO = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4B9Q87OShMm7Y4KXBY3Zt25fCmjKTElQwhg&s"
 
 export default function SpotifyLite() {
-  const [step, setStep] = useState('login') // login, home
+  const [step, setStep] = useState('login')
   const [password, setPassword] = useState('')
-  const [injections, setInjections] = useState(0)
-  const [isInjecting, setIsInjecting] = useState(false)
+  const [aimValue, setAimValue] = useState(15)
   const [os, setOs] = useState('android')
+  const [logs, setLogs] = useState(['> Sistema iniciado...', '> Aguardando autenticação...'])
+  const [isInjecting, setIsInjecting] = useState(false)
+
+  const addLog = (msg: string) => {
+    setLogs(prev => [...prev.slice(-4), `> ${msg}`])
+  }
 
   const handleLogin = () => {
     if (password.toUpperCase() === 'ACESSO-FREE') {
       setStep('home')
+      addLog('Login efetuado: Versão LITE')
     } else {
-      alert('Senha incorreta! Use: ACESSO-FREE')
+      alert('Senha incorreta!')
     }
   }
 
-  const handleInject = () => {
-    if (injections >= 1) {
-      alert("DEMONSTRAÇÃO EXPIRADA: Adquira a Key VIP para acesso ilimitado e Aimlock 100%.")
-      window.location.href = "https://wa.me/seunumero"
-      return
+  const handleAimChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value)
+    if (val > 30) {
+      addLog('ERRO: Limite de 30% na versão FREE')
+      setAimValue(30)
+    } else {
+      setAimValue(val)
+      addLog(`Aimlock ajustado: ${val}%`)
     }
-    setIsInjecting(true)
-    setTimeout(() => {
-      setIsInjecting(false)
-      setInjections(1)
-      alert("Versão LITE aplicada com sucesso!")
-    }, 3000)
   }
 
   if (step === 'login') {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center p-8 bg-black text-white font-sans">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="white" className="mb-8"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z"/></svg>
-        <h1 className="text-2xl font-black mb-10 text-center">Entrar no Majestic Booster</h1>
+        <img src={SPOTIFY_LOGO} className="w-20 h-20 mb-8 rounded-full shadow-[0_0_30px_rgba(29,185,84,0.4)]" />
+        <h1 className="text-2xl font-black mb-10 text-center uppercase tracking-tighter">Majestic Booster</h1>
         
         <div className="w-full space-y-4">
           <input 
-            type="text" 
+            type="password" 
             placeholder="Senha de acesso" 
-            className="w-full bg-[#333] p-4 rounded-md outline-none focus:ring-2 ring-white"
+            className="w-full bg-[#121212] border border-[#333] p-4 rounded-md outline-none focus:border-[#1DB954] transition-all"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button 
-            onClick={handleLogin}
-            className="w-full bg-[#1DB954] text-black font-bold py-4 rounded-full uppercase tracking-widest text-sm"
-          >
-            Entrar
-          </button>
+          <button onClick={handleLogin} className="w-full bg-[#1DB954] text-black font-bold py-4 rounded-full uppercase tracking-widest text-sm active:scale-95 transition-all">Entrar</button>
         </div>
-        <p className="mt-6 text-gray-500 text-[10px] uppercase font-bold tracking-widest">A senha é: ACESSO-FREE</p>
+        <a href="https://discord.gg/majesticos" className="mt-8 text-gray-500 text-[11px] font-bold uppercase tracking-widest hover:text-white transition-colors">
+          Senha em: <span className="text-[#1DB954] underline">discord.gg/majesticos</span>
+        </a>
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col text-white select-none overflow-hidden" style={{ background: BG_GRADIENT }}>
+    <div className="fixed inset-0 flex flex-col bg-black text-white font-sans overflow-hidden select-none">
       
-      {/* Header Spotify */}
-      <div className="pt-12 px-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-           <div className="w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z"/></svg>
-           </div>
-           <h1 className="font-bold text-xl tracking-tight">Suas Configurações</h1>
+      {/* Header Estilo Spotify */}
+      <div className="pt-10 px-6 pb-4 border-b border-white/5 flex items-center gap-4">
+        <img src={SPOTIFY_LOGO} className="w-10 h-10 rounded-full" />
+        <div>
+          <h2 className="text-[10px] font-black text-[#1DB954] uppercase tracking-widest">Painel de Controle</h2>
+          <h1 className="text-xl font-bold">LITE EDITION</h1>
         </div>
       </div>
 
-      <div className="flex-1 px-6 pt-8 space-y-8 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-6 pt-6 space-y-6 pb-40">
         
-        {/* Selector de Sistema */}
-        <div className="flex gap-2 p-1 bg-[#222] rounded-lg">
-           <button onClick={() => setOs('android')} className={`flex-1 py-2 rounded-md text-xs font-bold transition-all ${os === 'android' ? 'bg-[#333] text-white shadow-xl' : 'text-gray-500'}`}>ANDROID</button>
-           <button onClick={() => setOs('ios')} className={`flex-1 py-2 rounded-md text-xs font-bold transition-all ${os === 'ios' ? 'bg-[#333] text-white shadow-xl' : 'text-gray-500'}`}>IOS (BETA)</button>
+        {/* Aimlock Ajustável */}
+        <div className="bg-[#121212] p-4 rounded-xl border border-white/5">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm font-bold uppercase tracking-tighter">Aimlock Suave</span>
+            <span className="text-[#1DB954] font-mono text-sm">{aimValue}%</span>
+          </div>
+          <input 
+            type="range" min="0" max="100" value={aimValue} onChange={handleAimChange}
+            className="w-full h-1.5 bg-[#333] rounded-lg appearance-none cursor-pointer accent-[#1DB954]"
+          />
+          <p className="text-[10px] text-gray-500 mt-2 italic">* Máximo 30% na versão gratuita</p>
         </div>
 
-        {/* Funções */}
-        <div className="space-y-6">
-          <div className="flex flex-col">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-bold">Aimlock (Suave)</span>
-              <span className="text-[#1DB954] text-xs font-bold">30% FIXED</span>
-            </div>
-            <div className="h-1.5 w-full bg-[#333] rounded-full">
-              <div className="h-full bg-[#1DB954] w-[30%]"></div>
-            </div>
+        {/* Opções Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[#121212] p-3 rounded-lg border border-white/5">
+            <div className="text-[10px] text-gray-500 font-bold mb-1">FPS</div>
+            <div className="text-xs font-bold text-green-500">ESTÁVEL</div>
           </div>
+          <div onClick={() => addLog('VIP: Regedit 2026 Bloqueado')} className="bg-[#121212] p-3 rounded-lg border border-white/5 opacity-50">
+            <div className="text-[10px] text-gray-500 font-bold mb-1">REGEDIT</div>
+            <div className="text-xs font-bold text-red-500">VIP APENAS</div>
+          </div>
+        </div>
 
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="font-bold">Estabilizar FPS</div>
-              <div className="text-[11px] text-gray-400 font-medium italic">Otimização {os.toUpperCase()} ativa</div>
-            </div>
-            <div className="w-12 h-6 bg-[#1DB954] rounded-full flex items-center px-1 shadow-[0_0_10px_#1DB954]">
-               <div className="w-4 h-4 bg-white rounded-full ml-auto"></div>
+        {/* Checkboxes Simples */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center bg-[#121212] p-4 rounded-xl border border-white/5">
+            <span className="text-sm font-bold opacity-40 italic underline">Antena 100% Head</span>
+            <div className="w-4 h-4 rounded border border-gray-600"></div>
+          </div>
+          <div className="flex justify-between items-center bg-[#121212] p-4 rounded-xl border border-white/5">
+            <span className="text-sm font-bold">Otimizar Motor {os === 'android' ? 'Unity' : 'Swift'}</span>
+            <div className="w-5 h-5 bg-[#1DB954] rounded flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="black"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-between items-center opacity-40">
-            <div>
-              <div className="font-bold">Norecoil Seguro</div>
-              <div className="text-[11px] text-red-500 font-bold uppercase tracking-tighter">Bloqueado na versão Free</div>
-            </div>
-            <input type="checkbox" disabled className="w-6 h-6 border-gray-600 accent-gray-600 rounded" />
-          </div>
+        {/* Logs Estilo Spotify Terminal */}
+        <div className="bg-black/50 p-4 rounded-lg font-mono text-[10px] text-[#1DB954] space-y-1 border border-[#1DB954]/20">
+          {logs.map((log, i) => <div key={i}>{log}</div>)}
         </div>
       </div>
 
-      {/* Player de Música inferior */}
-      <div className="bg-[#181818] p-6 pb-12 rounded-t-3xl shadow-2xl">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-[#1DB954] to-[#000] rounded shadow-lg flex items-center justify-center">
-             <span className="font-black text-2xl italic">M</span>
+      {/* Player de Injeção */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#181818] p-6 pb-10 border-t border-white/5">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-full h-1 bg-gray-800 rounded-full">
+            <div className="h-full bg-[#1DB954] transition-all duration-[3000ms]" style={{ width: isInjecting ? '100%' : '0%' }}></div>
           </div>
-          <div className="flex-1">
-            <div className="text-sm font-bold">Majestic Lite - {os === 'android' ? 'APK' : 'IPA'}</div>
-            <div className="text-xs text-gray-500">Aguardando play para injetar...</div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-5">
-          <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
-             <div className="h-full bg-white transition-all duration-[3000ms]" style={{ width: isInjecting ? '100%' : '0%' }}></div>
-          </div>
-          
           <button 
-            onClick={handleInject}
-            className="w-16 h-16 bg-white rounded-full flex items-center justify-center active:scale-90 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+            onClick={() => {
+              setIsInjecting(true)
+              addLog('Injetando módulos LITE...')
+              setTimeout(() => { setIsInjecting(false); addLog('SUCESSO! Free Fire Otimizado'); }, 3000)
+            }}
+            className="w-14 h-14 bg-white rounded-full flex items-center justify-center active:scale-90 transition-all"
           >
-            {isInjecting ? (
-              <div className="w-6 h-6 border-3 border-black border-t-transparent animate-spin rounded-full"></div>
-            ) : (
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
-            )}
+            {isInjecting ? <div className="w-5 h-5 border-2 border-black border-t-transparent animate-spin rounded-full"></div> : <svg width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>}
           </button>
+          <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Executar Injeção</span>
         </div>
       </div>
     </div>

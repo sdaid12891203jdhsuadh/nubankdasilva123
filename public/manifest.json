@@ -1,13 +1,13 @@
 {
-  "name": "Nubank",
-  "short_name": "Nubank",
+  "name": "Portal de Acessos",
+  "short_name": "Portal",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#820ad1",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "https://s3.amazonaws.com//beta-img.b2bstack.net/uploads/production/provider/image/36/o2hFZ2Wc.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050222.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

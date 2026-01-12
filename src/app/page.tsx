@@ -1,190 +1,203 @@
-'use client'
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Loja de Roupas - Parceiros</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Roupas">
+    <meta name="theme-color" content="#000000">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3050/3050222.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3050/3050222.png">
 
-import { useEffect, useMemo, useState } from 'react'
-
-type Device = 'android' | 'ios'
-
-const ACCENT = '#820ad1'
-const BG = '#000000'
-const NU_ICON = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmSBqotrU4emvswOB389weXcAHPuGe1tffJw&s"
-
-const VALID_KEYS = [
-  "aura2", "NUBANK-MOD", "AJUDA-SALA", "MAJESTIC-PRO", "CLISHA-091", 
-  "NU-FAST-01", "NU-FAST-02", "NU-FAST-03", "MAJ-PRO-X1", "MAJ-PRO-X2", 
-  "MAJ-PRO-X3", "SAFE-INJ-77", "SAFE-INJ-88", "SAFE-INJ-99", "VIP-BLOCK-0", 
-  "VIP-BLOCK-1", "VIP-BLOCK-2", "GOLD-NU-55", "SILVER-NU-44", "SHIELD-99", 
-  "SHIELD-88", "BZ-33-MOD", "BZ-44-MOD", "ACCESS-FULL", "ACCESS-FREE"
-];
-
-function Spinner() {
-  return (
-    <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-t-transparent"
-      style={{ borderColor: 'rgba(130,10,209,0.12)', borderTopColor: ACCENT }} />
-  )
-}
-
-function cn(...c: Array<string | false | null | undefined>) {
-  return c.filter(Boolean).join(' ')
-}
-
-export default function Page() {
-  const [stage, setStage] = useState<'login' | 'loading' | 'app'>('login')
-  const [key, setKey] = useState('')
-  const [device, setDevice] = useState<Device>('ios')
-  const [logs, setLogs] = useState<string[]>([])
-  const [injecting, setInjecting] = useState(false)
-  
-  // Estados da IA de Sensibilidade
-  const [phoneModel, setPhoneModel] = useState('')
-  const [senseType, setSenseType] = useState<'ALTA' | 'BAIXA'>('ALTA')
-  const [generatedSense, setGeneratedSense] = useState<any>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
-
-  const [c1, setC1] = useState(true)
-  const [c2, setC2] = useState(true)
-  const [c3, setC3] = useState(false)
-
-  function handleLogin() {
-    const val = key.trim().toUpperCase();
-    if (!VALID_KEYS.includes(val)) {
-      alert('Erro de autenticação: Esta KEY não está vinculada.');
-      return;
-    }
-    setStage('loading')
-    setTimeout(() => setStage('app'), 1500)
-  }
-
-  // IA SENSE PARA NUBANK
-  const generateIAConfig = () => {
-    if (!phoneModel) return alert("Digite o modelo do aparelho!")
-    setIsGenerating(true)
-    setTimeout(() => {
-      const base = senseType === 'ALTA' ? 94 : 82
-      const random = () => Math.floor(Math.random() * 6)
-      setGeneratedSense({
-        geral: base + random(),
-        redDot: base + 3 + random(),
-        mira2x: 98 + random(),
-        mira4x: 100,
-        dpi: device === 'android' ? (senseType === 'ALTA' ? 720 + random() : 411) : 'Otimizada iOS'
-      })
-      setIsGenerating(false)
-    }, 1800)
-  }
-
-  function handleApply() {
-    if (injecting) return
-    setInjecting(true)
-    setLogs(["> [SISTEMA] Iniciando bypass...", "> [DATA] Sincronizando Hardware ID...", "> [SUCCESS] Injeção completa!"])
-    setTimeout(() => {
-      window.location.href = device === 'android' 
-        ? 'intent://#Intent;package=com.dts.freefireth;scheme=android-app;end'
-        : 'https://apps.apple.com/br/app/free-fire/id1300146617'
-    }, 3000)
-  }
-
-  return (
-    <div className="fixed inset-0 flex flex-col text-white select-none overflow-hidden bg-black">
-      <head>
-        <title>Nubank</title>
-        <meta name="theme-color" content="#000000" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href={NU_ICON} />
-      </head>
-
-      <style jsx global>{`
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; }
         :root { --sat: env(safe-area-inset-top); }
-        .app-container { padding-top: var(--sat); }
-      `}</style>
+        .safe-top { padding-top: var(--sat); }
+        .nu-purple { background-color: #820ad1; }
+        .text-purple { color: #820ad1; }
+        input[type="range"] { accent-color: #820ad1; }
+        .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="fixed inset-0 overflow-hidden select-none">
 
-      {stage === 'login' && (
-        <div className="flex-1 flex flex-col px-6 pb-12 pt-24 animate-in fade-in duration-500">
-          <img src={NU_ICON} alt="Nu" style={{ width: 50, marginBottom: 40, borderRadius: '10px' }} />
-          <h1 className="mb-9 text-[26px] font-medium leading-tight tracking-tight">Olá, qual é o seu CPF?</h1>
-          <div className="mb-1 text-[13px] font-medium" style={{ color: ACCENT }}>CPF</div>
-          <div className="mb-6 border-b-[1.5px]" style={{ borderColor: ACCENT }}>
-            <input value={key} onChange={(e) => setKey(e.target.value)} placeholder="000.000.000-00" className="w-full bg-transparent py-2 text-[18px] outline-none" />
-          </div>
-          <button onClick={handleLogin} className="mt-auto w-full rounded-full py-[18px] font-semibold active:scale-95 transition-transform" style={{ background: ACCENT }}>Continuar</button>
+    <div id="stage-login" class="flex flex-col h-full px-8 pt-24 pb-12 fade-in">
+        <div class="mb-10">
+            <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20.37 4.91l-3.37-2.1a2 2 0 0 0-2.11 0l-9.76 5.9A2 2 0 0 0 4 10.38V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5.63a1 1 0 0 0-.63-.72z"/><path d="M12 21V7"/></svg>
+            </div>
+            <h1 class="text-3xl font-bold tracking-tighter">Área do <br><span class="text-purple">Afiliado</span></h1>
+            <p class="text-gray-400 text-sm mt-2">Acesse seu painel de performance e vendas.</p>
         </div>
-      )}
 
-      {stage === 'loading' && (
-        <div className="flex-1 grid place-items-center"><Spinner /></div>
-      )}
-
-      {stage === 'app' && (
-        <div className="flex-1 flex flex-col app-container overflow-y-auto px-5 pb-10">
-          <div className="mt-8 mb-7 flex justify-between items-end">
+        <div class="space-y-4">
             <div>
-              <div className="text-[20px] font-bold">Painel Majestic VIP</div>
-              <div className="text-[11px] text-[#820ad1] font-bold uppercase tracking-widest">Hardware ID Ativo</div>
+                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">ID de Acesso</label>
+                <input type="text" id="key-input" placeholder="Digite sua KEY de parceiro" 
+                    class="w-full bg-[#111] border border-white/10 p-4 rounded-xl outline-none focus:border-purple transition-all text-white">
             </div>
-            <img src={NU_ICON} className="w-8 h-8 rounded-lg" />
-          </div>
+            <button onclick="handleLogin()" class="w-full nu-purple py-4 rounded-xl font-bold uppercase text-xs tracking-widest active:scale-95 transition-all shadow-lg shadow-purple/20">
+                Entrar no Painel
+            </button>
+        </div>
 
-          {/* IA DE SENSIBILIDADE VIP */}
-          <div className="mb-6 rounded-2xl border border-[#820ad1]/30 bg-[#111] p-5">
-            <h3 className="text-[10px] font-black text-[#820ad1] mb-4 uppercase tracking-[0.2em]">IA Sense Generator Pro</h3>
-            <input 
-              type="text" placeholder="Modelo do Aparelho..." 
-              className="w-full bg-black border border-[#222] p-3 rounded-xl text-sm mb-3 outline-none focus:border-[#820ad1]"
-              value={phoneModel} onChange={(e) => setPhoneModel(e.target.value)}
-            />
-            <div className="flex gap-2 mb-4">
-              <button onClick={() => setSenseType('ALTA')} className={`flex-1 py-2 rounded-xl text-[10px] font-black border transition-all ${senseType === 'ALTA' ? 'bg-[#820ad1] border-[#820ad1] text-white' : 'border-[#222] text-gray-500'}`}>SENSE ALTA</button>
-              <button onClick={() => setSenseType('BAIXA')} className={`flex-1 py-2 rounded-xl text-[10px] font-black border transition-all ${senseType === 'BAIXA' ? 'bg-[#820ad1] border-[#820ad1] text-white' : 'border-[#222] text-gray-500'}`}>SENSE BAIXA</button>
+        <div class="mt-auto text-center">
+            <p class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Premium Partner Program © 2024</p>
+        </div>
+    </div>
+
+    <div id="stage-loading" class="hidden h-full flex flex-col items-center justify-center fade-in">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-purple/20 border-t-purple"></div>
+        <p class="mt-4 text-[10px] font-bold tracking-[0.3em] text-purple">SINCRONIZANDO...</p>
+    </div>
+
+    <div id="stage-app" class="hidden flex flex-col h-full safe-top overflow-y-auto px-6 pb-12 fade-in">
+        <div class="mt-8 mb-8 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-black tracking-tighter uppercase">Majestic <span class="text-purple">VIP</span></h2>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Injetor Ativo</span>
+                </div>
             </div>
-            <button onClick={generateIAConfig} disabled={isGenerating} className="w-full bg-white text-black font-black py-3 rounded-xl text-[11px] uppercase hover:opacity-90 active:scale-95 transition-all">
-              {isGenerating ? 'PROCESSANDO IA...' : 'GERAR CONFIGURAÇÃO VIP'}
+            <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-[#111]">
+                <span class="text-[10px] font-bold">V1.2</span>
+            </div>
+        </div>
+
+        <div class="mb-6 rounded-3xl border border-white/5 bg-[#111] p-6 shadow-2xl">
+            <div class="flex items-center gap-2 mb-6">
+                <div class="w-1 h-4 nu-purple rounded-full"></div>
+                <h3 class="text-[11px] font-black uppercase tracking-widest">IA Sense Generator</h3>
+            </div>
+            
+            <input type="text" id="phone-model" placeholder="Ex: iPhone 13 Pro Max" 
+                class="w-full bg-black border border-white/5 p-4 rounded-2xl text-sm mb-4 outline-none focus:border-purple/50">
+            
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button onclick="setSenseType('ALTA')" id="btn-alta" class="py-3 rounded-xl text-[10px] font-bold border border-purple nu-purple">SENSE ALTA</button>
+                <button onclick="setSenseType('BAIXA')" id="btn-baixa" class="py-3 rounded-xl text-[10px] font-bold border border-white/5 text-gray-500">SENSE BAIXA</button>
+            </div>
+            
+            <button onclick="generateSense()" id="btn-gen" class="w-full bg-white text-black font-black py-4 rounded-2xl text-[11px] uppercase active:scale-95 transition-all">
+                Gerar Melhor Sensibilidade
             </button>
 
-            {generatedSense && (
-              <div className="mt-5 grid grid-cols-2 gap-3 animate-in slide-in-from-bottom-2">
-                {Object.entries(generatedSense).map(([k, v]: any) => (
-                  <div key={k} className="bg-black/60 p-3 rounded-xl border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase font-bold">{k}</div>
-                    <div className="text-md font-black text-white">{v}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* BOTÕES DE SISTEMA */}
-          <div className="mb-6 flex gap-1 rounded-xl border p-1 bg-[#111] border-[#222]">
-            <button onClick={() => setDevice('android')} className={cn('flex-1 rounded-[10px] py-2 text-[12px] font-bold', device === 'android' ? 'bg-[#222] text-[#820ad1]' : 'text-white/35')}>ANDROID</button>
-            <button onClick={() => setDevice('ios')} className={cn('flex-1 rounded-[10px] py-2 text-[12px] font-bold', device === 'ios' ? 'bg-[#222] text-[#820ad1]' : 'text-white/35')}>IOS (BRASIL)</button>
-          </div>
-
-          {/* Toggles */}
-          <div className="mb-6 rounded-2xl border p-2 bg-[#111] border-[#222]">
-            <ToggleRow label="Aimlock 100% (Headshot)" checked={c1} onChange={setC1} />
-            <ToggleRow label="Anti-Ban Security" checked={c2} onChange={setC2} />
-            <ToggleRow label="FPS Boost Ultra" checked={c3} onChange={setC3} noDivider />
-          </div>
-
-          <button onClick={handleApply} disabled={injecting} className="w-full rounded-full py-[20px] font-black uppercase tracking-widest text-[13px] transition-all active:scale-95" style={{ background: ACCENT, opacity: injecting ? 0.6 : 1 }}>
-            {injecting ? 'INJETANDO...' : 'ATIVAR NO JOGO'}
-          </button>
-          
-          {logs.length > 0 && (
-            <div className="mt-4 p-3 bg-black rounded border border-[#820ad1]/20 font-mono text-[9px] text-[#820ad1]">
-              {logs.map((l, i) => <div key={i} className="animate-pulse">{l}</div>)}
-            </div>
-          )}
+            <div id="sense-result" class="hidden mt-6 grid grid-cols-2 gap-3 animate-in fade-in zoom-in-95">
+                </div>
         </div>
-      )}
-    </div>
-  )
-}
 
-function ToggleRow({ label, checked, onChange, noDivider }: any) {
-  return (
-    <div className={cn('flex items-center justify-between px-4 py-4', !noDivider && 'border-b border-white/5')}>
-      <label className="text-[14px] font-medium text-white/90">{label}</label>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-[18px] w-[18px]" style={{ accentColor: ACCENT }} />
+        <div class="mb-6 grid grid-cols-2 gap-2 p-1 bg-[#111] rounded-2xl border border-white/5">
+            <button onclick="setOS('android')" id="os-android" class="py-3 rounded-xl text-[10px] font-bold text-gray-500">ANDROID</button>
+            <button onclick="setOS('ios')" id="os-ios" class="py-3 rounded-xl text-[10px] font-bold bg-[#222] text-purple">IOS (BRASIL)</button>
+        </div>
+
+        <div class="mb-8 rounded-3xl border border-white/5 bg-[#111] overflow-hidden">
+            <div class="flex items-center justify-between p-5 border-b border-white/5">
+                <span class="text-sm font-bold">Auto-Aim Headshot</span>
+                <input type="checkbox" checked class="w-5 h-5">
+            </div>
+            <div class="flex items-center justify-between p-5 border-b border-white/5">
+                <span class="text-sm font-bold">Bypass Anti-Cheat</span>
+                <input type="checkbox" checked class="w-5 h-5">
+            </div>
+            <div class="flex items-center justify-between p-5">
+                <span class="text-sm font-bold">Ultra FPS Boost</span>
+                <input type="checkbox" class="w-5 h-5">
+            </div>
+        </div>
+
+        <button onclick="handleInject()" id="btn-inject" class="w-full nu-purple py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-purple/30 active:scale-95 transition-all">
+            Injetar no Free Fire
+        </button>
+
+        <div id="logs" class="hidden mt-6 p-4 bg-black rounded-2xl border border-purple/20 font-mono text-[10px] text-purple space-y-2"></div>
     </div>
-  )
-}
+
+    <script>
+        let currentOS = 'ios';
+        let currentSenseType = 'ALTA';
+        // Coloque aqui suas Keys válidas
+        const VALID_KEYS = ["AURA2", "MAJESTIC-PRO", "123456", "VIP-ACCESS"];
+
+        function handleLogin() {
+            const val = document.getElementById('key-input').value.trim().toUpperCase();
+            if(!VALID_KEYS.includes(val)) return alert("ID DE AFILIADO NÃO ENCONTRADO!");
+
+            document.getElementById('stage-login').classList.add('hidden');
+            document.getElementById('stage-loading').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('stage-loading').classList.add('hidden');
+                document.getElementById('stage-app').classList.remove('hidden');
+            }, 2000);
+        }
+
+        function setSenseType(type) {
+            currentSenseType = type;
+            document.getElementById('btn-alta').className = type === 'ALTA' ? 'py-3 rounded-xl text-[10px] font-bold border border-purple nu-purple' : 'py-3 rounded-xl text-[10px] font-bold border border-white/5 text-gray-500';
+            document.getElementById('btn-baixa').className = type === 'BAIXA' ? 'py-3 rounded-xl text-[10px] font-bold border border-purple nu-purple' : 'py-3 rounded-xl text-[10px] font-bold border border-white/5 text-gray-500';
+        }
+
+        function setOS(os) {
+            currentOS = os;
+            document.getElementById('os-android').className = os === 'android' ? 'py-3 rounded-xl text-[10px] font-bold bg-[#222] text-purple' : 'py-3 rounded-xl text-[10px] font-bold text-gray-500';
+            document.getElementById('os-ios').className = os === 'ios' ? 'py-3 rounded-xl text-[10px] font-bold bg-[#222] text-purple' : 'py-3 rounded-xl text-[10px] font-bold text-gray-500';
+        }
+
+        function generateSense() {
+            const model = document.getElementById('phone-model').value;
+            if(!model) return alert("Digite o modelo do aparelho!");
+            
+            const btn = document.getElementById('btn-gen');
+            btn.innerText = "IA ANALISANDO HARDWARE...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const base = currentSenseType === 'ALTA' ? 95 : 84;
+                const res = document.getElementById('sense-result');
+                res.innerHTML = `
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5 text-center">
+                        <div class="text-[8px] text-gray-500 uppercase font-bold mb-1">GERAL</div>
+                        <div class="text-xl font-black text-purple">${base + Math.floor(Math.random()*4)}</div>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5 text-center">
+                        <div class="text-[8px] text-gray-500 uppercase font-bold mb-1">DPI</div>
+                        <div class="text-xl font-black text-purple">${currentOS === 'android' ? '720' : 'OFF'}</div>
+                    </div>
+                `;
+                res.classList.remove('hidden');
+                btn.innerText = "GERAR MELHOR SENSIBILIDADE";
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        function handleInject() {
+            const btn = document.getElementById('btn-inject');
+            const logs = document.getElementById('logs');
+            btn.innerText = "EXECUTANDO BYPASS...";
+            btn.disabled = true;
+            logs.classList.remove('hidden');
+            logs.innerHTML = '<div>> Iniciando conexão segura...</div>';
+
+            setTimeout(() => {
+                logs.innerHTML += '<div class="text-green-500">> SUCESSO! Abrindo Free Fire...</div>';
+                setTimeout(() => {
+                    window.location.href = currentOS === 'android' 
+                        ? 'intent://#Intent;package=com.dts.freefireth;scheme=android-app;end'
+                        : 'https://apps.apple.com/br/app/free-fire/id1300146617';
+                    btn.innerText = "INJETAR NO FREE FIRE";
+                    btn.disabled = false;
+                }, 1500);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

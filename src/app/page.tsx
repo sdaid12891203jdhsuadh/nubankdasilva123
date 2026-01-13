@@ -84,7 +84,10 @@ export default function AimAssistElite() {
   }
 
   return (
-<div className="fixed inset-0 bg-[#070707] text-zinc-100 font-mono overflow-hidden select-none">
+// Use 'fixed inset-0' para garantir que ela cubra inclusive a área da barra de baixo
+<div className="fixed inset-0 bg-[#070707] flex flex-col text-zinc-100 font-mono overflow-hidden select-none">
+  {/* Conteúdo */}
+</div>
       
       {/* --- CONFIGURAÇÃO DO ÍCONE E PWA NO HEAD --- */}
      <head>

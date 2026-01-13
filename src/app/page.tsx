@@ -2,6 +2,9 @@
 
 import { useState, useMemo } from 'react'
 
+// URL DO ÍCONE QUE VOCÊ ENVIOU
+const ICON_URL = "https://i.pinimg.com/736x/92/10/31/9210312165bce2f3fead1812b95d1583.jpg"
+
 export default function AimAssistElite() {
   const [step, setStep] = useState<'login' | 'os' | 'panel'>('login')
   const [password, setPassword] = useState('')
@@ -11,16 +14,11 @@ export default function AimAssistElite() {
   const [progress, setProgress] = useState(0)
   const [logs, setLogs] = useState(['> KERNEL_READY', '> ENCRYPTION: AES-256'])
 
-  // Configurações Técnicas
   const [sensi, setSensi] = useState({ dpi: 600, geral: 95, redDot: 85 })
-  const [opts, setOpts] = useState({
-    antiShake: true,
-    noRecoil: true, 
-    headLimit: true
-  })
+  const [opts, setOpts] = useState({ antiShake: true, noRecoil: true, headLimit: true })
 
   const VALID_KEYS = useMemo(() => [
-    "xxxx", "NUBANK-MOD", "123456", "MAJESTIC-PRO", "CLISHA-091", 
+    "xxxx", "NUBANK-MOD", "256", "MAJESTIC-PRO", "CLISHA-091", 
     "NU-FAST-01", "NU-FAST-02", "NU-FAST-03", "MAJ-PRO-X1", "MAJ-PRO-X2", 
     "MAJ-PRO-X3", "SAFE-INJ-77", "SAFE-INJ-88", "SAFE-INJ-99", "VIP-BLOCK-0", 
     "VIP-BLOCK-1", "VIP-BLOCK-2", "GOLD-NU-55", "SILVER-NU-44", "SHIELD-99", 
@@ -64,9 +62,8 @@ export default function AimAssistElite() {
     setProgress(0)
     const sequence = [
       `> Detectando core ${os.toUpperCase()}...`,
-      "> Calibrando Anti-Shake (Mira Estável)...",
-      "> Ajustando NoRecoil p/ 35%...",
-      "> Aplicando Limitador de Cabeça...",
+      "> Calibrando Anti-Shake...",
+      "> NoRecoil 35% aplicado...",
       "> INJEÇÃO CONCLUÍDA!"
     ]
     sequence.forEach((text, i) => {
@@ -89,76 +86,66 @@ export default function AimAssistElite() {
   return (
     <div className="fixed inset-0 bg-[#070707] text-zinc-100 font-mono overflow-hidden select-none">
       
-      {/* TELA DE LOGIN */}
+      {/* --- CONFIGURAÇÃO DO ÍCONE E PWA NO HEAD --- */}
+      <head>
+        <title>Skins VIP</title>
+        <meta name="apple-mobile-web-app-title" content="Skins VIP" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href={ICON_URL} />
+        <link rel="icon" href={ICON_URL} />
+      </head>
+
       {step === 'login' && (
         <div className="flex flex-col h-full items-center justify-center p-8 animate-in fade-in">
-          <div className="w-16 h-16 bg-blue-600/10 rounded-2xl border border-blue-600/30 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(37,99,235,0.1)]">
-             <span className="text-3xl font-black text-blue-600 italic">A</span>
+          {/* O ÍCONE QUE VOCÊ MANDOU APLICADO NA TELA DE LOGIN */}
+          <div className="w-24 h-24 mb-6 rounded-3xl overflow-hidden border-2 border-blue-600/50 shadow-[0_0_30px_rgba(37,99,235,0.3)]">
+             <img src={ICON_URL} alt="Icon" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-xl font-black italic mb-1 tracking-tighter uppercase">Painel <span className="text-blue-600">VIP</span></h1>
-          <p className="text-[8px] text-zinc-600 mb-10 tracking-[0.5em] uppercase font-bold">Encrypted Session</p>
+          <p className="text-[8px] text-zinc-600 mb-10 tracking-[0.5em] uppercase font-bold text-center">Injeção de Sensibilidade e Auxílio</p>
           
           <input 
             type="text" placeholder="DIGITE SUA KEY" 
             className="w-full bg-[#111] border border-white/5 p-5 rounded-2xl mb-4 text-center font-bold tracking-widest outline-none focus:border-blue-600/50 uppercase"
             value={password} onChange={(e) => setPassword(e.target.value)}
           />
-          <button onClick={handleLogin} className="w-full bg-blue-600 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all">Acessar Painel</button>
+          <button onClick={handleLogin} className="w-full bg-blue-600 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-[0.2em]">Entrar no Sistema</button>
         </div>
       )}
 
-      {/* SELEÇÃO DE SISTEMA (iOS vs Android) */}
       {step === 'os' && (
         <div className="flex flex-col h-full justify-center px-8 animate-in slide-in-from-bottom-10">
           <h2 className="text-[10px] font-black mb-8 text-center uppercase tracking-[0.5em] text-zinc-500">Escolha seu Sistema</h2>
           <div className="space-y-4">
             <button onClick={() => { setOs('android'); setStep('panel') }} className="w-full bg-[#111] border border-white/5 p-7 rounded-[2rem] flex justify-between items-center group active:scale-95 transition-all">
-              <div className="text-left">
-                <p className="font-black italic uppercase tracking-widest text-xs">Android Core</p>
-                <p className="text-[8px] text-zinc-600 font-mono">APK_INJECTOR_V12</p>
-              </div>
+              <span className="font-black italic uppercase tracking-widest text-xs">Android Core</span>
               <span className="text-blue-600 text-xl group-hover:translate-x-1 transition-transform">→</span>
             </button>
             <button onClick={() => { setOs('ios'); setStep('panel') }} className="w-full bg-[#111] border border-white/5 p-7 rounded-[2rem] flex justify-between items-center group active:scale-95 transition-all">
-              <div className="text-left">
-                <p className="font-black italic uppercase tracking-widest text-xs">iOS System</p>
-                <p className="text-[8px] text-zinc-600 font-mono">PLIST_OVERRIDE_IPHONE</p>
-              </div>
+              <span className="font-black italic uppercase tracking-widest text-xs">iOS System</span>
               <span className="text-blue-600 text-xl group-hover:translate-x-1 transition-transform">→</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* PAINEL PRINCIPAL */}
       {step === 'panel' && (
         <div className="flex flex-col h-full pt-12 px-6 animate-in fade-in">
           <header className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
-            <div>
+            <div className="flex items-center gap-3">
+               <img src={ICON_URL} className="w-6 h-6 rounded-md object-cover" />
                <h1 className="text-[10px] font-black italic text-zinc-400 uppercase">Aim Assist <span className="text-blue-600">{os}</span></h1>
-               <p className="text-[7px] text-zinc-600 font-mono">DEVICE_STABLE: OK</p>
             </div>
             <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
           </header>
 
-          {/* Seletor de Tipo de Sensi */}
           <div className="bg-[#111] p-2 rounded-2xl border border-white/5 mb-4 flex">
-            <button 
-              onClick={() => setSenseType('baixa')}
-              className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all ${senseType === 'baixa' ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}
-            >
-              Sense Baixa (50-70)
-            </button>
-            <button 
-              onClick={() => setSenseType('alta')}
-              className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all ${senseType === 'alta' ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}
-            >
-              Sense Alta (80-150)
-            </button>
+            <button onClick={() => setSenseType('baixa')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all ${senseType === 'baixa' ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Sense Baixa</button>
+            <button onClick={() => setSenseType('alta')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all ${senseType === 'alta' ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Sense Alta</button>
           </div>
 
-          {/* Gerador de Sensibilidade */}
-          <div className="bg-[#111] p-5 rounded-3xl border border-white/5 mb-5 shadow-2xl">
+          <div className="bg-[#111] p-5 rounded-3xl border border-white/5 mb-5">
             <div className="flex justify-between items-center mb-4">
               <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Calculadora Sensi</span>
               <button onClick={generateSensi} className="text-[8px] bg-white text-black px-3 py-1 rounded-lg font-black uppercase">Gerar</button>
@@ -179,7 +166,6 @@ export default function AimAssistElite() {
             </div>
           </div>
 
-          {/* Opções de Injeção */}
           <div className="bg-[#111] p-6 rounded-[2.5rem] border border-white/5 mb-6 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <span className="text-[10px] font-bold uppercase tracking-tight">Anti-Shake Mira</span>
@@ -190,25 +176,16 @@ export default function AimAssistElite() {
               <span className="text-[9px] font-black text-blue-500">ATIVO</span>
             </div>
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-[10px] font-bold uppercase tracking-tight">Não passar muito da cabeça</span>
-              <input 
-                type="checkbox" 
-                checked={opts.headLimit} 
-                onChange={() => setOpts({...opts, headLimit: !opts.headLimit})}
-                className="w-5 h-5 rounded bg-black border-white/10 accent-blue-600"
-              />
+              <span className="text-[10px] font-bold uppercase tracking-tight">Não passar da cabeça</span>
+              <input type="checkbox" checked={opts.headLimit} onChange={() => setOpts({...opts, headLimit: !opts.headLimit})} className="w-5 h-5 rounded bg-black border-white/10 accent-blue-600" />
             </label>
           </div>
 
-          <button 
-            onClick={handleInject} disabled={isInjecting}
-            className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] uppercase text-[11px] tracking-[0.3em] relative overflow-hidden active:scale-95 transition-all shadow-xl shadow-blue-900/20"
-          >
-            <span className="relative z-10">{isInjecting ? 'INJECTING_CORE...' : 'INJETAR AGORA'}</span>
+          <button onClick={handleInject} disabled={isInjecting} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] uppercase text-[11px] tracking-[0.3em] relative overflow-hidden active:scale-95 transition-all shadow-xl shadow-blue-900/20">
+            <span className="relative z-10">{isInjecting ? 'EXECUTANDO...' : 'INJETAR AGORA'}</span>
             <div className="absolute inset-0 bg-white/20 transition-all duration-500" style={{ width: `${progress}%`, opacity: isInjecting ? 1 : 0 }} />
           </button>
 
-          {/* Terminal de Logs */}
           <div className="mt-5 bg-black/40 p-4 rounded-2xl border border-white/5 h-20 overflow-y-auto font-mono text-[8px] text-zinc-600 space-y-1">
             {logs.map((log, i) => <div key={i}><span className="text-blue-900 mr-2 font-black italic">#</span>{log}</div>)}
           </div>

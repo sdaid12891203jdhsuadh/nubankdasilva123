@@ -2,120 +2,75 @@
 
 import { useState } from 'react'
 
-const ICON_MUSIC = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png"
+// ÍCONE DISFARÇADO DE MÚSICA PARA A VERSÃO FREE
+const MUSIC_ICON = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png"
 
-export default function MusicFree() {
-  const [step, setStep] = useState('login')
+export default function MusicaBoosterFree() {
+  const [step, setStep] = useState<'login' | 'panel'>('login')
   const [password, setPassword] = useState('')
-  const [aimValue, setAimValue] = useState(15)
-  const [os, setOs] = useState<'android' | 'ios'>('ios')
-  const [isInjecting, setIsInjecting] = useState(false)
-  const [logs, setLogs] = useState(['> Player carregado...', '> Aguardando login...'])
 
   const handleLogin = () => {
-    // Mantendo a lógica de acesso da versão Free
-    if (password.toUpperCase() === 'ACESSO-FREE') {
-      setStep('home')
-      setLogs(prev => [...prev, '> Sessão iniciada (Versão Free)'])
+    if (password.toUpperCase() === "ACESSO-FREE") {
+      setStep('panel')
     } else {
-      alert('Chave inválida!')
+      alert('KEY FREE INVÁLIDA!')
     }
   }
 
-  const handleInject = () => {
-    setIsInjecting(true)
-    setLogs(prev => [...prev, '> Iniciando injeção lite...'])
-    
-    // Simulação de passos de injeção
-    const steps = [
-      "> Otimizando buffer de áudio...",
-      "> Ajustando latência de entrada...",
-      "> SUCESSO! Abrindo aplicação..."
-    ]
-
-    steps.forEach((text, i) => {
-      setTimeout(() => {
-        setLogs(prev => [...prev, text])
-        if (i === steps.length - 1) {
-          setTimeout(() => {
-            // Redirecionamento automático após os logs
-            if (os === 'android') {
-              window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth"
-            } else {
-              window.location.href = "https://apps.apple.com/br/app/free-fire/id1300146617"
-            }
-          }, 1000)
-        }
-      }, (i + 1) * 800)
-    })
-  }
-
   return (
-    <div className="fixed inset-0 bg-black text-white font-sans overflow-hidden select-none">
+    <div className="fixed inset-0 bg-[#070707] flex flex-col text-zinc-100 font-mono overflow-hidden select-none">
+      
+      {/* OVERRIDE PARA O NOME DO APP NO NAVEGADOR */}
       <head>
-        <title>Music Player</title>
-        <meta name="apple-mobile-web-app-title" content="Music" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#000000" />
+        <title>MUSICA BOOSTER</title>
+        <meta name="apple-mobile-web-app-title" content="MUSICA BOOSTER" />
+        <link rel="apple-touch-icon" href={MUSIC_ICON} />
+        <link rel="icon" href={MUSIC_ICON} />
       </head>
 
-      {step === 'login' ? (
-        <div className="flex flex-col h-full items-center justify-center p-8 text-center animate-in fade-in">
-          <img src={ICON_MUSIC} className="w-20 h-20 mb-8 opacity-50" />
-          <h1 className="text-2xl font-black mb-10 tracking-tighter uppercase">Music Booster</h1>
+      {step === 'login' && (
+        <div className="flex flex-col h-full items-center justify-center p-8 animate-in fade-in">
+          <div className="w-24 h-24 mb-6 rounded-full bg-blue-600/10 border-2 border-blue-600/30 flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.1)]">
+             <img src={MUSIC_ICON} alt="Music Icon" className="w-16 h-16 object-contain" />
+          </div>
+          <h1 className="text-xl font-black italic mb-1 tracking-tighter uppercase text-white">Music <span className="text-blue-600">Booster</span></h1>
+          <p className="text-[8px] text-zinc-600 mb-10 tracking-[0.5em] uppercase font-bold text-center">Som Estéreo & Equalizador VIP</p>
+          
           <input 
-            type="password" placeholder="Chave de Acesso" 
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl mb-4 outline-none focus:border-[#1DB954] text-center"
+            type="text" placeholder="CHAVE DE ACESSO" 
+            className="w-full bg-[#111] border border-white/5 p-5 rounded-2xl mb-4 text-center font-bold tracking-widest outline-none focus:border-blue-600/50 uppercase text-white"
             value={password} onChange={(e) => setPassword(e.target.value)}
           />
-          <button onClick={handleLogin} className="w-full bg-[#1DB954] text-black font-bold py-4 rounded-full uppercase text-xs tracking-widest active:scale-95 transition-all">
-            Entrar
-          </button>
+          <button onClick={handleLogin} className="w-full bg-blue-600 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all">Ativar Booster</button>
         </div>
-      ) : (
+      )}
+
+      {step === 'panel' && (
         <div className="flex flex-col h-full pt-12 px-6 animate-in fade-in">
-           <div className="flex items-center justify-between mb-8">
-             <div className="flex items-center gap-4">
-               <img src={ICON_MUSIC} className="w-10 h-10 opacity-50" />
-               <h1 className="text-xl font-bold">Performance LITE</h1>
-             </div>
-             {/* Seletor simples de OS para saber qual loja abrir */}
-             <select 
-              value={os} 
-              onChange={(e) => setOs(e.target.value as any)}
-              className="bg-transparent text-[10px] font-bold uppercase border border-white/10 rounded px-2 py-1 outline-none"
-             >
-               <option value="ios" className="bg-black">iOS</option>
-               <option value="android" className="bg-black">Android</option>
-             </select>
-           </div>
-           
-           <div className="bg-[#121212] p-6 rounded-2xl border border-white/5 mb-6">
-              <div className="flex justify-between mb-4">
-                <span className="text-[10px] font-bold text-gray-400 uppercase">Aimlock Soft</span>
-                <span className="text-[#1DB954] font-bold">{aimValue}%</span>
-              </div>
-              <input type="range" min="0" max="100" value={aimValue} onChange={(e) => {
-                const v = parseInt(e.target.value);
-                setAimValue(v > 30 ? 30 : v);
-              }} className="w-full h-1 bg-[#333] appearance-none accent-[#1DB954]" />
-           </div>
+          <header className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+            <div className="flex items-center gap-3">
+               <img src={MUSIC_ICON} className="w-6 h-6 object-contain" />
+               <h1 className="text-[10px] font-black italic text-zinc-400 uppercase">Equalizador <span className="text-blue-600">FREE</span></h1>
+            </div>
+          </header>
 
-           {/* Botão Injetar Adicionado */}
-           <button 
-             onClick={handleInject}
-             disabled={isInjecting}
-             className="w-full bg-[#1DB954] text-black font-black py-5 rounded-2xl uppercase text-[11px] tracking-[0.2em] shadow-lg shadow-[#1DB954]/20 active:scale-95 transition-all mb-6 disabled:opacity-50"
-           >
-             {isInjecting ? 'Processando...' : 'Injetar no Jogo'}
-           </button>
+          <div className="bg-[#111] p-6 rounded-[2.5rem] border border-white/5 mb-6 text-center">
+            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-4">Recursos Disponíveis</p>
+            <div className="space-y-3">
+               <div className="flex justify-between text-[9px] font-bold py-2 border-b border-white/5">
+                  <span>BOOST DE ÁUDIO</span>
+                  <span className="text-blue-500">ATIVADO</span>
+               </div>
+               <div className="flex justify-between text-[9px] font-bold py-2 border-b border-white/5">
+                  <span>SINCRONIA DE MIRA</span>
+                  <span className="text-blue-500">MÉDIA</span>
+               </div>
+            </div>
+          </div>
 
-           {/* Console de Logs para passar credibilidade */}
-           <div className="bg-[#080808] p-4 rounded-xl border border-white/5 font-mono text-[9px] text-gray-500 space-y-1 mb-4 h-24 overflow-y-auto">
-             {logs.map((log, i) => <div key={i}>{log}</div>)}
-           </div>
-           
-           <p className="text-[9px] text-gray-500 text-center uppercase tracking-widest mt-auto pb-10">Versão Free: Recursos Limitados</p>
+          <p className="text-[8px] text-zinc-600 text-center uppercase leading-relaxed">
+            Versão gratuita limitada. <br/> Adquira a <b>ROUPAS CHECK VIP</b> para sensibilidade alta e antishake completo.
+          </p>
         </div>
       )}
     </div>

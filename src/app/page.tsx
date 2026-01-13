@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 
-const NUBANK_ICON = "https://logodownload.org/wp-content/uploads/2019/08/nubank-logo-2-1.png"
+const NUBANK_ICON = "https://logodownload.org/wp-content/uploads/2019/08/nubank-logo-2.png"
 
 export default function NubankVipSystem() {
   const [view, setView] = useState<'splash' | 'error' | 'login' | 'os' | 'panel'>('splash')

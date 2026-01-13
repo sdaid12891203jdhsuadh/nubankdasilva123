@@ -1,21 +1,22 @@
 {
-  "short_name": "ROUPAS CHECK",
-  "name": "ROUPAS DE MARCA",
+  "short_name": " ",
+  "name": " ",
   "icons": [
     {
-      "src": "https://i.pinimg.com/736x/92/10/31/9210312165bce2f3fead1812b95d1583.jpg",
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Nubank_logo_2021.svg/1200px-Nubank_logo_2021.svg.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "https://i.pinimg.com/736x/92/10/31/9210312165bce2f3fead1812b95d1583.jpg",
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Nubank_logo_2021.svg/1200px-Nubank_logo_2021.svg.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#070707",
-  "background_color": "#070707"
+  "theme_color": "#820AD1",
+  "background_color": "#820AD1"
 }

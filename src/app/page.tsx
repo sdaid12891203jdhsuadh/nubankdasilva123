@@ -51,7 +51,7 @@ export default function NubankVipSystem() {
     "VIP-BLOCK-0",
     "PAINELVIP-9XP7K4ZQ8M2F",
     "VIP-BLOCK-1",
-    "PAINELVIP-9XPZKQF7M248A",
+    
     "VIP-BLOCK-2",
     "GOLD-NU-55",
     "PAINELVIP-KF9M8XPZ247Q",

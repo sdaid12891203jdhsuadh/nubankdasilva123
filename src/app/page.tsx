@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 
-// URL DO ÍCONE QUE VOCÊ ENVIOU
 const ICON_URL = "https://i.pinimg.com/736x/92/10/31/9210312165bce2f3fead1812b95d1583.jpg"
 
 export default function AimAssistElite() {
@@ -18,7 +17,7 @@ export default function AimAssistElite() {
   const [opts, setOpts] = useState({ antiShake: true, noRecoil: true, headLimit: true })
 
   const VALID_KEYS = useMemo(() => [
-    "xxxx", "NUBANK-MOD", "256", "MAJESTIC-PRO", "CLISHA-091", 
+    "XXXX", "NUBANK-MOD", "256", "MAJESTIC-PRO", "CLISHA-091", 
     "NU-FAST-01", "NU-FAST-02", "NU-FAST-03", "MAJ-PRO-X1", "MAJ-PRO-X2", 
     "MAJ-PRO-X3", "SAFE-INJ-77", "SAFE-INJ-88", "SAFE-INJ-99", "VIP-BLOCK-0", 
     "VIP-BLOCK-1", "VIP-BLOCK-2", "GOLD-NU-55", "SILVER-NU-44", "SHIELD-99", 
@@ -84,27 +83,10 @@ export default function AimAssistElite() {
   }
 
   return (
-// Use 'fixed inset-0' para garantir que ela cubra inclusive a área da barra de baixo
-<div className="fixed inset-0 bg-[#070707] flex flex-col text-zinc-100 font-mono overflow-hidden select-none">
-  {/* Conteúdo */}
-</div>
-      
-      {/* --- CONFIGURAÇÃO DO ÍCONE E PWA NO HEAD --- */}
-     <head>
-  <title>ROUPAS CHECK</title>
-  <meta name="theme-color" content="#070707" />
-  <link rel="manifest" href="/manifest.json" />
-  
-  {/* Configurações para iPhone reconhecer o ícone e nome */}
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="ROUPAS CHECK" />
-  <link rel="apple-touch-icon" href="https://i.pinimg.com/736x/92/10/31/9210312165bce2f3fead1812b95d1583.jpg" />
-</head>
-
+    <div className="fixed inset-0 bg-[#070707] flex flex-col text-zinc-100 font-mono overflow-hidden select-none">
+      {/* TELA DE LOGIN */}
       {step === 'login' && (
         <div className="flex flex-col h-full items-center justify-center p-8 animate-in fade-in">
-          {/* O ÍCONE QUE VOCÊ MANDOU APLICADO NA TELA DE LOGIN */}
           <div className="w-24 h-24 mb-6 rounded-3xl overflow-hidden border-2 border-blue-600/50 shadow-[0_0_30px_rgba(37,99,235,0.3)]">
              <img src={ICON_URL} alt="Icon" className="w-full h-full object-cover" />
           </div>
@@ -113,13 +95,14 @@ export default function AimAssistElite() {
           
           <input 
             type="text" placeholder="DIGITE SUA KEY" 
-            className="w-full bg-[#111] border border-white/5 p-5 rounded-2xl mb-4 text-center font-bold tracking-widest outline-none focus:border-blue-600/50 uppercase"
+            className="w-full bg-[#111] border border-white/5 p-5 rounded-2xl mb-4 text-center font-bold tracking-widest outline-none focus:border-blue-600/50 uppercase text-white"
             value={password} onChange={(e) => setPassword(e.target.value)}
           />
           <button onClick={handleLogin} className="w-full bg-blue-600 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-[0.2em]">Entrar no Sistema</button>
         </div>
       )}
 
+      {/* SELEÇÃO DE SISTEMA */}
       {step === 'os' && (
         <div className="flex flex-col h-full justify-center px-8 animate-in slide-in-from-bottom-10">
           <h2 className="text-[10px] font-black mb-8 text-center uppercase tracking-[0.5em] text-zinc-500">Escolha seu Sistema</h2>
@@ -136,8 +119,9 @@ export default function AimAssistElite() {
         </div>
       )}
 
+      {/* PAINEL DE CONTROLE */}
       {step === 'panel' && (
-        <div className="flex flex-col h-full pt-12 px-6 animate-in fade-in">
+        <div className="flex flex-col h-full pt-12 px-6 animate-in fade-in overflow-y-auto">
           <header className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
             <div className="flex items-center gap-3">
                <img src={ICON_URL} className="w-6 h-6 rounded-md object-cover" />
@@ -187,12 +171,12 @@ export default function AimAssistElite() {
             </label>
           </div>
 
-          <button onClick={handleInject} disabled={isInjecting} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] uppercase text-[11px] tracking-[0.3em] relative overflow-hidden active:scale-95 transition-all shadow-xl shadow-blue-900/20">
+          <button onClick={handleInject} disabled={isInjecting} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] uppercase text-[11px] tracking-[0.3em] relative overflow-hidden active:scale-95 transition-all shadow-xl shadow-blue-900/20 mb-4">
             <span className="relative z-10">{isInjecting ? 'EXECUTANDO...' : 'INJETAR AGORA'}</span>
             <div className="absolute inset-0 bg-white/20 transition-all duration-500" style={{ width: `${progress}%`, opacity: isInjecting ? 1 : 0 }} />
           </button>
 
-          <div className="mt-5 bg-black/40 p-4 rounded-2xl border border-white/5 h-20 overflow-y-auto font-mono text-[8px] text-zinc-600 space-y-1">
+          <div className="mt-auto bg-black/40 p-4 rounded-2xl border border-white/5 h-20 overflow-y-auto font-mono text-[8px] text-zinc-600 space-y-1 mb-6">
             {logs.map((log, i) => <div key={i}><span className="text-blue-900 mr-2 font-black italic">#</span>{log}</div>)}
           </div>
         </div>

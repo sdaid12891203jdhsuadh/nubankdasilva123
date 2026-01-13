@@ -180,7 +180,7 @@ export default function NubankVipSystem() {
 "VIP-7XPZQF4K",
 "VIP-M4XP9ZKQ",
 "VIP-QXP8Z4M2"
-    "XXXX"
+    
   ], [])
 
   // =========================

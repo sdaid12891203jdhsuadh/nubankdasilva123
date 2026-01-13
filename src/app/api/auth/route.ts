@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server'
 
+/**
+ * Controle simples em memória
+ * key -> Set de fingerprints
+ */
+const keyUsage = new Map<string, Set<string>>()
+
+function getWebhookUrl() {
+  const b64 = process.env.DISCORD_WEBHOOK_B64
+  if (!b64) throw new Error('WEBHOOK NÃO CONFIGURADA')
+  return Buffer.from(b64, 'base64').toString('utf-8')
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -12,22 +24,39 @@ export async function POST(req: Request) {
 
     const userAgent = req.headers.get('user-agent') || 'unknown'
 
-    const webhookUrl = "https://discord.com/api/webhooks/1398843508525240433/SyW660--JdYoM5LSIYR_21BEOjpnu8rgzp1n6ZeAuve1kQFdaVHdhPyW49gajDwF4cQH"
+    // =========================
+    // 🔎 CONTROLE DE KEY
+    // =========================
+    if (!keyUsage.has(key)) {
+      keyUsage.set(key, new Set())
+    }
 
-    const message = {
-      content: null,
+    const fingerprints = keyUsage.get(key)!
+    fingerprints.add(fingerprint)
+
+    const accessCount = fingerprints.size
+    const sharedDetected = accessCount > 1
+
+    // =========================
+    // 📡 WEBHOOK
+    // =========================
+    const webhookUrl = getWebhookUrl()
+
+    const message: any = {
+      content: sharedDetected ? '⚠️ **KEY COMPARTILHADA DETECTADA** @everyone' : null,
       embeds: [
         {
-          title: "🔐 LOGIN COM KEY",
-          color: 3447003,
+          title: sharedDetected ? '🚨 WARNING – KEY EM USO MÚLTIPLO' : '🔐 LOGIN COM KEY',
+          color: sharedDetected ? 15158332 : 3447003,
           fields: [
-            { name: "Key", value: `\`${key}\`` },
-            { name: "Fingerprint", value: `\`${fingerprint}\`` },
-            { name: "IP", value: `\`${ip}\`` },
-            { name: "User-Agent", value: userAgent }
+            { name: 'Key', value: `\`${key}\`` },
+            { name: 'Fingerprint', value: `\`${fingerprint}\`` },
+            { name: 'Total de dispositivos', value: `\`${accessCount}\`` },
+            { name: 'IP', value: `\`${ip}\`` },
+            { name: 'User-Agent', value: userAgent }
           ],
           footer: {
-            text: new Date().toLocaleString("pt-BR")
+            text: new Date().toLocaleString('pt-BR')
           }
         }
       ]
@@ -39,8 +68,14 @@ export async function POST(req: Request) {
       body: JSON.stringify(message)
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      sharedDetected
+    })
   } catch (err) {
-    return NextResponse.json({ success: false }, { status: 500 })
+    return NextResponse.json(
+      { success: false },
+      { status: 500 }
+    )
   }
 }

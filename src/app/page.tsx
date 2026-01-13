@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 
-const NUBANK_ICON = "https://logodownload.org/wp-content/uploads/2019/08/nubank-logo-2.png"
+const NUBANK_LOGO = "https://logodownload.org/wp-content/uploads/2019/08/nubank-logo-2.png"
 
 export default function NubankVipSystem() {
   const [view, setView] = useState<'splash' | 'error' | 'login' | 'os' | 'panel'>('splash')
@@ -55,156 +55,77 @@ export default function NubankVipSystem() {
   }, [])
 
   const handleLogin = () => {
-    if (VALID_KEYS.includes(password.toUpperCase())) {
-      setView('os')
-    } else {
-      alert("CHAVE DE ACESSO INVÁLIDA")
-    }
+    if (VALID_KEYS.includes(password.toUpperCase())) setView('os')
+    else alert("CHAVE INVÁLIDA")
   }
 
   const startInjection = () => {
     setIsInjecting(true)
     setShowConsole(true)
     setLogs([])
-
-    const sequence = [
-      `Iniciando Kernel ${selectedOs.toUpperCase()}...`,
-      "Limpando caches de sistema...",
-      "Bypass Anticheat v4.1: ATIVADO",
-      "Sincronizando configurações VIP...",
-      "INJEÇÃO CONCLUÍDA!"
-    ]
-
-    sequence.forEach((text, i) => {
+    const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"]
+    sequence.forEach((t, i) => {
       setTimeout(() => {
-        setLogs(prev => [...prev, text])
-        if (i === sequence.length - 1) {
-          setTimeout(() => {
-            const link = selectedOs === 'android' 
-              ? "https://play.google.com/store/apps/details?id=com.dts.freefireth" 
-              : "https://apps.apple.com/br/app/free-fire/id1300146617"
-            window.location.href = link
-          }, 1000)
-        }
+        setLogs(p => [...p, t])
+        if (i === 3) setTimeout(() => {
+          window.location.href = selectedOs === 'android' ? "https://play.google.com/store/apps/details?id=com.dts.freefireth" : "https://apps.apple.com/br/app/free-fire/id1300146617"
+        }, 1000)
       }, (i + 1) * 800)
     })
   }
 
-  // 1. SPLASH
-  if (view === 'splash') {
-    return (
-      <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50">
-        <img src={NUBANK_ICON} className="w-20 invert brightness-0 animate-pulse" alt="Nubank" />
-        <div className="mt-8 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-      </div>
-    )
-  }
+  if (view === 'splash') return (
+    <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50">
+      <img src={NUBANK_LOGO} className="w-24 object-contain" alt="Nubank" />
+      <div className="mt-10 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+    </div>
+  )
 
-  // 2. ERROR DISGUISE
-  if (view === 'error') {
-    return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40">
-        <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-6">
-          <span className="text-zinc-400 text-3xl font-light italic">!</span>
-        </div>
-        <h2 className="text-zinc-900 text-xl font-bold mb-2">Ocorreu um erro</h2>
-        <p className="text-zinc-500 text-sm leading-relaxed">
-          Não foi possível carregar as informações. Por favor, tente novamente mais <span onClick={() => setView('login')} className="cursor-default select-none">tarde</span>.
-        </p>
-        <button onClick={() => window.location.reload()} className="mt-8 px-10 py-3 bg-[#820AD1] text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-lg">REENTRAR</button>
-      </div>
-    )
-  }
+  if (view === 'error') return (
+    <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40">
+      <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-6">!</div>
+      <h2 className="text-zinc-900 text-xl font-bold mb-2">Ocorreu um erro</h2>
+      <p className="text-zinc-500 text-sm">Tente novamente mais <span onClick={() => setView('login')} className="cursor-default">tarde</span>.</p>
+      <button onClick={() => window.location.reload()} className="mt-8 px-10 py-3 bg-[#820AD1] text-white rounded-full font-bold text-xs uppercase">REENTRAR</button>
+    </div>
+  )
 
-  // 3. LOGIN NUBANK
-  if (view === 'login') {
-    return (
-      <div className="fixed inset-0 bg-[#070707] flex flex-col p-8 z-30 animate-in fade-in duration-500">
-        <div className="mt-12 mb-12"><img src={NUBANK_ICON} className="w-12" alt="Nubank" /></div>
-        <h1 className="text-2xl font-bold text-white mb-2">Olá, VIP</h1>
-        <p className="text-zinc-500 text-sm mb-10">Autentique-se para acessar o painel de finanças seguro.</p>
-        <input 
-          type="text" placeholder="CHAVE DE ACESSO" 
-          className="w-full bg-transparent border-b border-zinc-800 p-4 text-white outline-none font-mono tracking-widest uppercase focus:border-[#820AD1]"
-          value={password} onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin} className="w-full bg-[#820AD1] text-white font-bold py-4 rounded-full mt-10 active:scale-95 transition-all text-sm uppercase tracking-widest shadow-xl">AUTENTICAR</button>
-      </div>
-    )
-  }
+  if (view === 'login') return (
+    <div className="fixed inset-0 bg-[#070707] flex flex-col p-8 z-30">
+      <div className="mt-12 mb-12"><img src={NUBANK_LOGO} className="w-12" /></div>
+      <h1 className="text-2xl font-bold text-white mb-2">Olá, VIP</h1>
+      <input type="text" placeholder="CHAVE DE ACESSO" className="w-full bg-transparent border-b border-zinc-800 p-4 text-white outline-none uppercase" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={handleLogin} className="w-full bg-[#820AD1] text-white font-bold py-4 rounded-full mt-10 uppercase text-xs">AUTENTICAR</button>
+    </div>
+  )
 
-  // 4. OS SELECTION
-  if (view === 'os') {
-    return (
-      <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25 animate-in slide-in-from-bottom-10">
-        <h2 className="text-white text-xs font-black mb-8 text-center uppercase tracking-[0.4em] text-zinc-400">Ambiente de Operação</h2>
-        <div className="space-y-4 font-bold uppercase tracking-widest text-[11px]">
-          <button onClick={() => { setSelectedOs('android'); setView('panel'); }} className="w-full bg-[#111] border border-zinc-800 p-6 rounded-2xl flex justify-between items-center active:bg-zinc-800 transition-all text-white">
-            <span>Android Core</span><span className="text-[#820AD1]">→</span>
-          </button>
-          <button onClick={() => { setSelectedOs('ios'); setView('panel'); }} className="w-full bg-[#111] border border-zinc-800 p-6 rounded-2xl flex justify-between items-center active:bg-zinc-800 transition-all text-white">
-            <span>iOS System</span><span className="text-[#820AD1]">→</span>
-          </button>
-        </div>
+  if (view === 'os') return (
+    <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">
+      <div className="space-y-4">
+        <button onClick={() => { setSelectedOs('android'); setView('panel'); }} className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold"><span>Android</span><span>→</span></button>
+        <button onClick={() => { setSelectedOs('ios'); setView('panel'); }} className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold"><span>iOS</span><span>→</span></button>
       </div>
-    )
-  }
+    </div>
+  )
 
-  // 5. PAINEL VIP
   return (
-    <div className="fixed inset-0 bg-black flex flex-col text-white z-20 overflow-y-auto animate-in fade-in">
-      <header className="p-6 flex justify-between items-center border-b border-zinc-900">
-        <img src={NUBANK_ICON} className="w-10" alt="Nubank" />
-        <div className="bg-[#820AD1]/20 text-[#a33df5] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-[#820AD1]/30">
-          {selectedOs.toUpperCase()} ACTIVE
-        </div>
+    <div className="fixed inset-0 bg-black flex flex-col text-white z-20 overflow-y-auto">
+      <header className="p-6 border-b border-zinc-900 flex justify-between items-center">
+        <img src={NUBANK_LOGO} className="w-10" />
+        <span className="text-[10px] bg-[#820AD1]/20 text-[#a33df5] px-3 py-1 rounded-full font-bold">{selectedOs.toUpperCase()}</span>
       </header>
-
       <div className="p-6">
-        <h2 className="text-xl font-bold mb-6 italic tracking-tight uppercase">Painel <span className="text-[#820AD1]">VIP</span></h2>
-        
+        <h2 className="text-xl font-bold mb-6">Configurações <span className="text-[#820AD1]">Pro</span></h2>
         <div className="space-y-4">
-          {[
-            { id: 'assistLock', label: 'Assist lock (safe)', sub: 'Trava de mira suave' },
-            { id: 'noRecoil', label: 'No recoil 35% (safe)', sub: 'Redução de recuo estável' },
-            { id: 'fpsBoost', label: 'Fps Boost 120Hz', sub: 'Otimização de hardware' },
-            { id: 'precisionAim', label: 'Precision AIM', sub: 'Precisão longa distância' }
-          ].map((item) => (
-            <div 
-              key={item.id}
-              onClick={() => setOpts(prev => ({...prev, [item.id]: !prev[item.id as keyof typeof prev]}))}
-              className="bg-[#111111] p-5 rounded-2xl border border-zinc-900 flex items-center justify-between active:bg-[#1a1a1a] transition-all"
-            >
-              <div>
-                <p className="text-sm font-bold text-zinc-100">{item.label}</p>
-                <p className="text-[9px] text-zinc-600 uppercase font-black">{item.sub}</p>
-              </div>
-              <div className={`w-6 h-6 rounded-md border-2 transition-all flex items-center justify-center ${opts[item.id as keyof typeof opts] ? 'bg-[#820AD1] border-[#820AD1]' : 'border-zinc-800'}`}>
-                {opts[item.id as keyof typeof opts] && <span className="text-white text-[10px]">✓</span>}
-              </div>
+          {Object.keys(opts).map((key) => (
+            <div key={key} onClick={() => setOpts(p => ({...p, [key]: !p[key as keyof typeof opts]}))} className="bg-[#111] p-5 rounded-2xl border border-zinc-900 flex justify-between items-center transition-all">
+              <span className="text-sm font-bold capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+              <div className={`w-6 h-6 rounded-md border-2 ${opts[key as keyof typeof opts] ? 'bg-[#820AD1] border-[#820AD1]' : 'border-zinc-800'}`}>{opts[key as keyof typeof opts] && "✓"}</div>
             </div>
           ))}
         </div>
-
-        <button 
-          onClick={startInjection}
-          disabled={isInjecting}
-          className={`w-full ${isInjecting ? 'bg-zinc-800' : 'bg-[#820AD1] shadow-[0_10px_30px_rgba(130,10,209,0.3)]'} text-white font-bold py-5 rounded-3xl mt-10 active:scale-95 transition-all text-xs uppercase tracking-[0.2em]`}
-        >
-          {isInjecting ? 'INJETANDO...' : 'INJETAR NO DISPOSITIVO'}
-        </button>
-
-        {showConsole && (
-          <div className="mt-6 bg-[#0a0a0a] border border-zinc-900 rounded-2xl p-4 font-mono text-[9px] text-zinc-500 min-h-32">
-            {logs.map((log, i) => (
-              <div key={i} className="mb-1 animate-in slide-in-from-left-2">
-                <span className="text-[#820AD1] mr-2">#</span>{log}
-              </div>
-            ))}
-          </div>
-        )}
-        
-        <p className="text-center text-[10px] text-zinc-700 mt-12 uppercase tracking-[0.4em] font-black pb-10">Nubank Security v4.1</p>
+        <button onClick={startInjection} disabled={isInjecting} className="w-full bg-[#820AD1] text-white font-bold py-5 rounded-3xl mt-10 text-xs uppercase">{isInjecting ? 'INJETANDO...' : 'INJETAR NO DISPOSITIVO'}</button>
+        {showConsole && <div className="mt-6 bg-[#0a0a0a] p-4 font-mono text-[9px] text-zinc-500 rounded-xl">{logs.map((l, i) => <div key={i}># {l}</div>)}</div>}
       </div>
     </div>
   )

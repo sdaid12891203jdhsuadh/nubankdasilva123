@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server'
 
-/**
- * Estrutura por key:
- * - IPs usados
- * - Fingerprints usados
- * - IP original
- */
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000 // 7 dias exatos
+
 type KeySession = {
   ips: Set<string>
   fingerprints: Set<string>
@@ -32,20 +28,24 @@ export async function POST(req: Request) {
       'unknown'
 
     const userAgent = req.headers.get('user-agent') || 'unknown'
+    const now = Date.now()
 
     // =========================
-    // 🔎 CONTROLE DA KEY
+    // 🧠 REGISTRO DA KEY
     // =========================
     if (!keySessions.has(key)) {
       keySessions.set(key, {
         ips: new Set([ip]),
         fingerprints: new Set([fingerprint]),
         firstIp: ip,
-        firstSeen: Date.now()
+        firstSeen: now
       })
     }
 
     const session = keySessions.get(key)!
+    const expiresAt = session.firstSeen + WEEK_MS
+    const expired = now > expiresAt
+
     session.ips.add(ip)
     session.fingerprints.add(fingerprint)
 
@@ -57,7 +57,42 @@ export async function POST(req: Request) {
       ipChanged || multipleIps || multipleFingerprints
 
     // =========================
-    // 📡 WEBHOOK
+    // 🚫 KEY EXPIRADA
+    // =========================
+    if (expired) {
+      await fetch(getWebhookUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: '⛔ **KEY EXPIRADA (7 DIAS)** @everyone',
+          embeds: [
+            {
+              title: '⏱️ KEY SEMANAL EXPIRADA',
+              color: 15158332,
+              fields: [
+                { name: 'Key', value: `\`${key}\`` },
+                { name: 'IP Atual', value: `\`${ip}\`` },
+                {
+                  name: 'Expirou em',
+                  value: `<t:${Math.floor(expiresAt / 1000)}:F>`
+                }
+              ],
+              footer: {
+                text: new Date().toLocaleString('pt-BR')
+              }
+            }
+          ]
+        })
+      })
+
+      return NextResponse.json(
+        { success: false, expired: true },
+        { status: 403 }
+      )
+    }
+
+    // =========================
+    // 📡 WEBHOOK NORMAL / WARNING
     // =========================
     const webhookUrl = getWebhookUrl()
 
@@ -77,7 +112,10 @@ export async function POST(req: Request) {
             { name: 'IP Original', value: `\`${session.firstIp}\`` },
             { name: 'IPs únicos', value: `\`${session.ips.size}\`` },
             { name: 'Fingerprints únicos', value: `\`${session.fingerprints.size}\`` },
-            { name: 'Fingerprint atual', value: `\`${fingerprint}\`` },
+            {
+              name: 'Expira em',
+              value: `<t:${Math.floor(expiresAt / 1000)}:R>`
+            },
             { name: 'User-Agent', value: userAgent }
           ],
           footer: {
@@ -95,9 +133,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      sharedDetected
+      sharedDetected,
+      expiresAt
     })
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { success: false },
       { status: 500 }

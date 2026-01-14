@@ -14,8 +14,8 @@ export default function NubankVipSystem() {
   const [showConsole, setShowConsole] = useState(false)
 
   const [opts, setOpts] = useState({
-    assistLock: true,
-    noRecoil 30: true,
+    assistLockFOV: true,
+    noRecoil30: true,
     fpsBoost: false,
     precisionAim: false
   })

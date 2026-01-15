@@ -154,82 +154,7 @@ export default function NubankVipSystem() {
     setView('os')
   }
 
-  const startInjection = () => {
-  setIsInjecting(true)
-  setShowConsole(true)
-  setLogs([])
-  const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"]
-  
-  sequence.forEach((t, i) => {
-    setTimeout(() => {
-      setLogs(p => [...p, t])
-      if (i === 3) {
-        setTimeout(() => {
-          const links = {
-            android: {
-              normal: "https://play.google.com/store/apps/details?id=com.dts.freefireth",
-              max: "https://play.google.com/store/apps/details?id=com.dts.freefiremax"
-            },
-            ios: {
-              normal: "https://apps.apple.com/br/app/free-fire/id1300146617",
-              max: "https://apps.apple.com/us/app/free-fire-max-x-jujutsu-kaisen/id1480516829?l=pt-BR"
-            }
-          }
-          window.location.href = links[selectedOs][selectedVersion]
-        }, 1000)
-      }
-    }, (i + 1) * 800)
-  })
-}
-
-  if (view === 'splash') return (
-    <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50">
-      <img src={NUBANK_LOGO} className="w-24 object-contain" alt="Nubank" />
-      <div className="mt-10 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-    </div>
-  )
-
-  if (view === 'version_select') return (
-  <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">
-    <h2 className="text-white text-center mb-8 font-bold text-xl uppercase tracking-widest">Escolha a Versão</h2>
-    <div className="space-y-4">
-      <button 
-        onClick={() => { setSelectedVersion('normal'); setView('panel'); }} 
-        className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold border border-zinc-900 active:bg-[#1a1a1a]"
-      >
-        <span>FREE FIRE NORMAL</span>
-        <span>→</span>
-      </button>
-      
-      <button 
-        onClick={() => { setSelectedVersion('max'); setView('panel'); }} 
-        className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold border border-zinc-900 active:bg-[#1a1a1a]"
-      >
-        <span>FREE FIRE MAX</span>
-        <span>→</span>
-      </button>
-    </div>
-    <button onClick={() => setView('os')} className="mt-8 text-zinc-600 text-[10px] uppercase font-bold text-center tracking-widest">← VOLTAR</button>
-  </div>
-)
-
-  if (view === 'error') return (
-    <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40">
-      <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-6">!</div>
-      <h2 className="text-zinc-900 text-xl font-bold mb-2">Ocorreu um erro</h2>
-      <p className="text-zinc-500 text-sm">Tente novamente mais <span onClick={() => setView('login')} className="cursor-default">tarde</span>.</p>
-      <button onClick={() => window.location.reload()} className="mt-8 px-10 py-3 bg-[#820AD1] text-white rounded-full font-bold text-xs uppercase">REENTRAR</button>
-    </div>
-  )
-
-  if (view === 'login') return (
-    <div className="fixed inset-0 bg-[#070707] flex flex-col p-8 z-30">
-      <div className="mt-12 mb-12"><img src={NUBANK_LOGO} className="w-12" /></div>
-      <h1 className="text-2xl font-bold text-white mb-2">Olá, VIP</h1>
-      <input type="text" placeholder="CHAVE DE ACESSO" className="w-full bg-transparent border-b border-zinc-800 p-4 text-white outline-none uppercase" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button onClick={handleLogin} className="w-full bg-[#820AD1] text-white font-bold py-4 rounded-full mt-10 uppercase text-xs">AUTENTICAR</button>
-    </div>
-  )
+ const startInjection = () => { setIsInjecting(true) setShowConsole(true) setLogs([]) const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"] sequence.forEach((t, i) => { setTimeout(() => { setLogs(p => [...p, t]) if (i === 3) setTimeout(() => { window.location.href = selectedOs === 'android' ? "https://play.google.com/store/apps/details?id=com.dts.freefireth" : "https://apps.apple.com/br/app/free-fire/id1300146617" }, 1000) }, (i + 1) * 800) }) } if (view === 'splash') return ( <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50"> <img src={NUBANK_LOGO} className="w-24 object-contain" alt="Nubank" /> <div className="mt-10 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /> </div> ) if (view === 'error') return ( <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40"> <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-6">!</div> <h2 className="text-zinc-900 text-xl font-bold mb-2">Ocorreu um erro</h2> <p className="text-zinc-500 text-sm">Tente novamente mais <span onClick={() => setView('login')} className="cursor-default">tarde</span>.</p> <button onClick={() => window.location.reload()} className="mt-8 px-10 py-3 bg-[#820AD1] text-white rounded-full font-bold text-xs uppercase">REENTRAR</button> </div> ) if (view === 'login') return ( <div className="fixed inset-0 bg-[#070707] flex flex-col p-8 z-30"> <div className="mt-12 mb-12"><img src={NUBANK_LOGO} className="w-12" /></div> <h1 className="text-2xl font-bold text-white mb-2">Olá, VIP</h1> <input type="text" placeholder="CHAVE DE ACESSO" className="w-full bg-transparent border-b border-zinc-800 p-4 text-white outline-none uppercase" value={password} onChange={(e) => setPassword(e.target.value)} /> <button onClick={handleLogin} className="w-full bg-[#820AD1] text-white font-bold py-4 rounded-full mt-10 uppercase text-xs">AUTENTICAR</button> </div> )
 
 if (view === 'os') return (
   <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">
@@ -245,58 +170,7 @@ if (view === 'os') return (
   </div>
 )
 
-  if (view === 'panel') return (
-  <div className="fixed inset-0 bg-black flex flex-col text-white z-20 overflow-y-auto">
-    <header className="p-6 border-b border-zinc-900 flex justify-between items-center bg-black/50 backdrop-blur-md sticky top-0 z-10">
-      <img src={NUBANK_LOGO} className="w-10" />
-      <div className="flex gap-2">
-        <span className="text-[9px] bg-[#820AD1]/20 text-[#a33df5] px-3 py-1 rounded-full font-bold">
-          {selectedOs.toUpperCase()}
-        </span>
-        <span className="text-[9px] bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full font-bold uppercase">
-          FF {selectedVersion}
-        </span>
-      </div>
-    </header>
 
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-6">Configurações <span className="text-[#820AD1]">Pro</span></h2>
-      
-      <div className="space-y-4">
-        {Object.keys(opts).map((key) => (
-          <div 
-            key={key} 
-            onClick={() => setOpts(p => ({...p, [key]: !p[key as keyof typeof opts]}))} 
-            className="bg-[#111] p-5 rounded-2xl border border-zinc-900 flex justify-between items-center transition-all active:scale-[0.98]"
-          >
-            <span className="text-sm font-bold capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-            <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${opts[key as keyof typeof opts] ? 'bg-[#820AD1] border-[#820AD1]' : 'border-zinc-800'}`}>
-              {opts[key as keyof typeof opts] && <span className="text-white text-xs">✓</span>}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <button 
-        onClick={startInjection} 
-        disabled={isInjecting} 
-        className={`w-full font-bold py-5 rounded-3xl mt-10 text-xs uppercase transition-all ${isInjecting ? 'bg-zinc-800 text-zinc-500' : 'bg-[#820AD1] text-white active:scale-95'}`}
-      >
-        {isInjecting ? 'AGUARDE...' : 'INJETAR NO DISPOSITIVO'}
-      </button>
-
-      {showConsole && (
-        <div className="mt-6 bg-[#0a0a0a] p-4 font-mono text-[10px] text-zinc-500 rounded-xl border border-zinc-900">
-          {logs.map((l, i) => (
-            <div key={i} className={l === "FINALIZADO!" ? "text-[#820AD1] font-bold" : ""}>
-              {`> ${l}`}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  </div>
-)
 
 return null /
 

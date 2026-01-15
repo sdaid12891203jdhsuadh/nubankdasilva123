@@ -155,19 +155,32 @@ export default function NubankVipSystem() {
   }
 
   const startInjection = () => {
-    setIsInjecting(true)
-    setShowConsole(true)
-    setLogs([])
-    const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"]
-    sequence.forEach((t, i) => {
-      setTimeout(() => {
-        setLogs(p => [...p, t])
-        if (i === 3) setTimeout(() => {
-          window.location.href = selectedOs === 'android' ? "https://play.google.com/store/apps/details?id=com.dts.freefireth" : "https://apps.apple.com/br/app/free-fire/id1300146617"
+  setIsInjecting(true)
+  setShowConsole(true)
+  setLogs([])
+  const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"]
+  
+  sequence.forEach((t, i) => {
+    setTimeout(() => {
+      setLogs(p => [...p, t])
+      if (i === 3) {
+        setTimeout(() => {
+          const links = {
+            android: {
+              normal: "https://play.google.com/store/apps/details?id=com.dts.freefireth",
+              max: "https://play.google.com/store/apps/details?id=com.dts.freefiremax"
+            },
+            ios: {
+              normal: "https://apps.apple.com/br/app/free-fire/id1300146617",
+              max: "https://apps.apple.com/us/app/free-fire-max-x-jujutsu-kaisen/id1480516829?l=pt-BR"
+            }
+          }
+          window.location.href = links[selectedOs][selectedVersion]
         }, 1000)
-      }, (i + 1) * 800)
-    })
-  }
+      }
+    }, (i + 1) * 800)
+  })
+}
 
   if (view === 'splash') return (
     <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50">
@@ -175,6 +188,30 @@ export default function NubankVipSystem() {
       <div className="mt-10 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
     </div>
   )
+
+  if (view === 'version_select') return (
+  <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">
+    <h2 className="text-white text-center mb-8 font-bold text-xl">Escolha a Versão</h2>
+    <div className="space-y-4">
+      <button 
+        onClick={() => { setSelectedVersion('normal'); setView('panel'); }} 
+        className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold border border-zinc-900"
+      >
+        <span>Free Fire Normal</span>
+        <span>→</span>
+      </button>
+      
+      <button 
+        onClick={() => { setSelectedVersion('max'); setView('panel'); }} 
+        className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold border border-zinc-900"
+      >
+        <span>Free Fire MAX</span>
+        <span>→</span>
+      </button>
+    </div>
+    <button onClick={() => setView('os')} className="mt-6 text-zinc-500 text-xs uppercase font-bold text-center">Voltar</button>
+  </div>
+)
 
   if (view === 'error') return (
     <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40">
@@ -194,14 +231,19 @@ export default function NubankVipSystem() {
     </div>
   )
 
-  if (view === 'os') return (
-    <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">
-      <div className="space-y-4">
-        <button onClick={() => { setSelectedOs('android'); setView('panel'); }} className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold"><span>Android</span><span>→</span></button>
-        <button onClick={() => { setSelectedOs('ios'); setView('panel'); }} className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold"><span>iOS</span><span>→</span></button>
-      </div>
+if (view === 'os') return (
+  <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">
+    <div className="space-y-4">
+      {/* Note que agora setView vai para 'version_select' */}
+      <button onClick={() => { setSelectedOs('android'); setView('version_select'); }} className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold">
+        <span>Android</span><span>→</span>
+      </button>
+      <button onClick={() => { setSelectedOs('ios'); setView('version_select'); }} className="w-full bg-[#111] p-6 rounded-2xl flex justify-between text-white font-bold">
+        <span>iOS</span><span>→</span>
+      </button>
     </div>
-  )
+  </div>
+)
 
   return (
     <div className="fixed inset-0 bg-black flex flex-col text-white z-20 overflow-y-auto">

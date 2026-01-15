@@ -154,7 +154,83 @@ export default function NubankVipSystem() {
     setView('os')
   }
 
- const startInjection = () => { setIsInjecting(true) setShowConsole(true) setLogs([]) const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"] sequence.forEach((t, i) => { setTimeout(() => { setLogs(p => [...p, t]) if (i === 3) setTimeout(() => { window.location.href = selectedOs === 'android' ? "https://play.google.com/store/apps/details?id=com.dts.freefireth" : "https://apps.apple.com/br/app/free-fire/id1300146617" }, 1000) }, (i + 1) * 800) }) } if (view === 'splash') return ( <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50"> <img src={NUBANK_LOGO} className="w-24 object-contain" alt="Nubank" /> <div className="mt-10 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /> </div> ) if (view === 'error') return ( <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40"> <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-6">!</div> <h2 className="text-zinc-900 text-xl font-bold mb-2">Ocorreu um erro</h2> <p className="text-zinc-500 text-sm">Tente novamente mais <span onClick={() => setView('login')} className="cursor-default">tarde</span>.</p> <button onClick={() => window.location.reload()} className="mt-8 px-10 py-3 bg-[#820AD1] text-white rounded-full font-bold text-xs uppercase">REENTRAR</button> </div> ) if (view === 'login') return ( <div className="fixed inset-0 bg-[#070707] flex flex-col p-8 z-30"> <div className="mt-12 mb-12"><img src={NUBANK_LOGO} className="w-12" /></div> <h1 className="text-2xl font-bold text-white mb-2">Olá, VIP</h1> <input type="text" placeholder="CHAVE DE ACESSO" className="w-full bg-transparent border-b border-zinc-800 p-4 text-white outline-none uppercase" value={password} onChange={(e) => setPassword(e.target.value)} /> <button onClick={handleLogin} className="w-full bg-[#820AD1] text-white font-bold py-4 rounded-full mt-10 uppercase text-xs">AUTENTICAR</button> </div> )
+ const startInjection = () => {
+
+    setIsInjecting(true)
+
+    setShowConsole(true)
+
+    setLogs([])
+
+    const sequence = ["Conectando ao Core...", "Bypass Anticheat...", "Sincronizando...", "FINALIZADO!"]
+
+    sequence.forEach((t, i) => {
+
+      setTimeout(() => {
+
+        setLogs(p => [...p, t])
+
+        if (i === 3) setTimeout(() => {
+
+          window.location.href = selectedOs === 'android' ? "https://play.google.com/store/apps/details?id=com.dts.freefireth" : "https://apps.apple.com/br/app/free-fire/id1300146617"
+
+        }, 1000)
+
+      }, (i + 1) * 800)
+
+    })
+
+  }
+
+
+
+  if (view === 'splash') return (
+
+    <div className="fixed inset-0 bg-[#820AD1] flex flex-col items-center justify-center z-50">
+
+      <img src={NUBANK_LOGO} className="w-24 object-contain" alt="Nubank" />
+
+      <div className="mt-10 w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+
+    </div>
+
+  )
+
+
+
+  if (view === 'error') return (
+
+    <div className="fixed inset-0 bg-white flex flex-col items-center justify-center p-10 text-center z-40">
+
+      <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-6">!</div>
+
+      <h2 className="text-zinc-900 text-xl font-bold mb-2">Ocorreu um erro</h2>
+
+      <p className="text-zinc-500 text-sm">Tente novamente mais <span onClick={() => setView('login')} className="cursor-default">tarde</span>.</p>
+
+      <button onClick={() => window.location.reload()} className="mt-8 px-10 py-3 bg-[#820AD1] text-white rounded-full font-bold text-xs uppercase">REENTRAR</button>
+
+    </div>
+
+  )
+
+
+
+  if (view === 'login') return (
+
+    <div className="fixed inset-0 bg-[#070707] flex flex-col p-8 z-30">
+
+      <div className="mt-12 mb-12"><img src={NUBANK_LOGO} className="w-12" /></div>
+
+      <h1 className="text-2xl font-bold text-white mb-2">Olá, VIP</h1>
+
+      <input type="text" placeholder="CHAVE DE ACESSO" className="w-full bg-transparent border-b border-zinc-800 p-4 text-white outline-none uppercase" value={password} onChange={(e) => setPassword(e.target.value)} />
+
+      <button onClick={handleLogin} className="w-full bg-[#820AD1] text-white font-bold py-4 rounded-full mt-10 uppercase text-xs">AUTENTICAR</button>
+
+    </div>
+
+  )
 
 if (view === 'os') return (
   <div className="fixed inset-0 bg-[#070707] flex flex-col justify-center p-8 z-25">

@@ -62,7 +62,7 @@ export default function NubankVipSystem() {
       {view === 'os' && (
         <OSSelect setSelectedOs={setSelectedOs} setView={setView} />
       )}
-
+{view === 'sense_select' && <SenseSelect setView={setView} />}
       {view === 'version_select' && (
         <VersionSelect setSelectedGame={setSelectedGame} setView={setView} />
       )}

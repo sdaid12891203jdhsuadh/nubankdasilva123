@@ -14,7 +14,7 @@ export default function OSSelect({ setSelectedOs, setView }: any) {
         
         {/* NOVO BOTÃO DE SENSIBILIDADE */}
         <button onClick={() => setView('sense_select')} className="w-full bg-[#820AD1]/10 p-6 rounded-2xl flex justify-between text-[#a33df5] font-bold border border-[#820AD1]/30 active:bg-[#820AD1]/20">
-          <span>SENSIBILIDADE DOS FAMOSOS ( EM DESENVOLVIMENTO ) </span><span>⭐</span>
+          <span>SENSIBILIDADE DOS FAMOSOS </span><span>⭐</span>
         </button>
       </div>
     </div>

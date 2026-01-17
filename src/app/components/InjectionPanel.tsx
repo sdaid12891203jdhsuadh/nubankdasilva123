@@ -122,3 +122,7 @@ export default function InjectionPanel({
     </p>
   </div>
 )}
+              </div>
+    </div>
+  )
+}

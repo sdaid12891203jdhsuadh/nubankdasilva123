@@ -71,7 +71,7 @@ export default function InjectionPanel({
         {/* BOTÃO FINAL: Abre o jogo diretamente para resolver o bug do Android */}
        {showFinalButton && (
   <div className="mt-8 animate-in fade-in zoom-in duration-500 pb-10">
-   <button
+ <button
   onClick={() => {
     if (typeof window === 'undefined') return;
 
@@ -94,12 +94,17 @@ export default function InjectionPanel({
 
     window.location.href = iosScheme;
   }}
-  className="w-full bg-emerald-500 text-white font-black py-6 rounded-3xl"
+  className="w-full bg-emerald-500 text-white font-black py-6 rounded-3xl flex flex-col items-center justify-center"
 >
-  🚀 ABRIR FREE FIRE AGORA
-      </span>
-      <span className="text-[10px] opacity-80 font-normal mt-1 uppercase">
-        Clique para finalizar sincronização
+  <span className="text-base uppercase tracking-widest">
+    🚀 ABRIR FREE FIRE AGORA
+  </span>
+
+  <span className="text-[10px] opacity-80 font-normal mt-1 uppercase">
+    Clique para finalizar sincronização
+  </span>
+</button>
+
       
     </button>
 

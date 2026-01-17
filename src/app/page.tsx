@@ -34,7 +34,7 @@ export default function NubankVipSystem() {
     else alert("CHAVE INVÁLIDA")
   }
 
-onst startInjection = () => {
+const startInjection = () => {
   setIsInjecting(true);
   setShowConsole(true);
 

@@ -21,8 +21,19 @@ export default function SenseSelect({ setView }: any) {
 
   if (showResult) {
     return (
-      <div className="fixed inset-0 bg-[#0f0f0f] text-white p-6 z-50 overflow-y-auto">
-        <button onClick={() => setShowResult(false)} className="mb-6 text-zinc-500 text-sm">← Voltar</button>
+    <div className="fixed inset-0 bg-[#0f0f0f] text-[#e5e5e5] flex flex-col p-6 z-40 overflow-y-auto">
+      
+      {/* BOTÃO VOLTAR AJUSTADO */}
+      <button 
+        onClick={() => setView('os')} 
+        className="mt-8 mb-8 text-zinc-500 text-sm flex items-center gap-2 hover:text-white transition-colors w-fit"
+      >
+        <span className="text-lg">←</span> Voltar
+      </button>
+
+      <h2 className="text-zinc-400 text-xs mb-4 font-medium uppercase tracking-widest opacity-50">
+        Configurações inspiradas nos pros
+      </h2>
         
         <h2 className="text-[#ff6b00] font-bold text-xl mb-1">Sensi: {selectedFamoso}</h2>
         <p className="text-zinc-500 text-xs mb-6 font-medium">Estilo: {selectedPrioridade}</p>

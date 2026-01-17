@@ -111,6 +111,7 @@ const getStoreUrl = () => {
           isInjecting={isInjecting} 
           showConsole={showConsole} 
           logs={logs}
+          showFinalButton={showFinalButton}
           
         />
       )}

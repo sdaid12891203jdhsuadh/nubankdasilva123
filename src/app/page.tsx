@@ -57,18 +57,17 @@ const startInjection = () => {
     }, (i + 1) * 1200);
   });
 };
+const getStoreUrl = () => {
+  if (selectedOs === 'android') {
+    return selectedGame === 'max'
+      ? "market://details?id=com.dts.freefiremax"
+      : "market://details?id=com.dts.freefireth";
+  }
 
-    if (selectedOs === 'android') {
-      // Usando market:// o Android abre direto no app da Play Store
-      url = selectedGame === 'max' 
-        ? "market://details?id=com.dts.freefiremax" 
-        : "market://details?id=com.dts.freefireth";
-    } else {
-      // iOS continua normal
-      url = selectedGame === 'max' 
-        ? "https://apps.apple.com/app/id1480516829" 
-        : "https://apps.apple.com/app/id1300146617";
-    }
+  return selectedGame === 'max'
+    ? "https://apps.apple.com/app/id1480516829"
+    : "https://apps.apple.com/app/id1300146617";
+};
 
 
 

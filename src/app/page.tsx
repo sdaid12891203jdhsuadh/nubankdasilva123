@@ -48,14 +48,12 @@ const startInjection = () => {
     "Arquivos substituídos com sucesso!"
   ];
 
-  sequence.forEach((t, i) => {
+  sequence.forEach((text, i) => {
     setTimeout(() => {
-      setLogs(p => [...p, t]);
-      
-      // Quando chegar na última mensagem, libera o botão de ação
+      setLogs(prev => [...prev, text]);
+
       if (i === sequence.length - 1) {
         setIsInjecting(false);
-      
       }
     }, (i + 1) * 1200);
   });
@@ -73,12 +71,7 @@ const startInjection = () => {
         : "https://apps.apple.com/app/id1300146617";
     }
 
-    window.location.href = url;
-  }, 1500);
-}
-      }, (i + 1) * 1200) // Intervalo de 1.2 segundos entre cada mensagem
-    })
-  }
+
 
  return (
   <main>

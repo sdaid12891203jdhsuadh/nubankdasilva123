@@ -100,7 +100,7 @@ export default function InjectionPanel({
       </span>
       <span className="text-[10px] opacity-80 font-normal mt-1 uppercase">
         Clique para finalizar sincronização
-      </span>
+      
     </button>
 
     <p className="text-center text-zinc-600 text-[9px] mt-4 uppercase font-bold italic">

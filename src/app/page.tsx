@@ -37,7 +37,7 @@ export default function NubankVipSystem() {
 onst startInjection = () => {
   setIsInjecting(true);
   setShowConsole(true);
-  setShowFinalButton(false);
+
   setLogs([]);
 
   const sequence = [
@@ -55,7 +55,7 @@ onst startInjection = () => {
       // Quando chegar na última mensagem, libera o botão de ação
       if (i === sequence.length - 1) {
         setIsInjecting(false);
-        setShowFinalButton(true);
+      
       }
     }, (i + 1) * 1200);
   });

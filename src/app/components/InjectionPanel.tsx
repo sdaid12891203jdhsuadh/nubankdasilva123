@@ -82,7 +82,8 @@ export default function InjectionPanel({
           ? 'com.dts.freefiremax'
           : 'com.dts.freefireth';
 
-      window.location.href = `intent://#Intent;package=${pkg};end`;
+     window.location.href =
+  `intent://launch/#Intent;scheme=${pkg.includes('max') ? 'freefiremax' : 'freefireth'};package=${pkg};end`;
       return;
     }
 

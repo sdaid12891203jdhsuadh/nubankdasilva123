@@ -18,7 +18,7 @@ export default function NubankVipSystem() {
   const [isInjecting, setIsInjecting] = useState(false)
   const [logs, setLogs] = useState<string[]>([])
   const [showConsole, setShowConsole] = useState(false)
-  const [opts, setOpts] = useState({ assistLock: true, noRecoil: true, fpsBoost: false, precisionAim: false })
+  const [opts, setOpts] = useState({ HeadLock: false, Tracking2x: false, Precision: false, AimFix: false })
   const [showFinalButton, setShowFinalButton] = useState(false);
 
 

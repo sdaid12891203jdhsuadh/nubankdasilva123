@@ -1,0 +1,20 @@
+{
+  "short_name": "MUSICA BOOSTER",
+  "name": "MUSICA BOOSTER FREE",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3844/3844724.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3844/3844724.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/free", 
+  "display": "standalone",
+  "theme_color": "#070707",
+  "background_color": "#070707"
+}

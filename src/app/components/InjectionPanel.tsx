@@ -4,6 +4,43 @@ import { haptics } from '../utils/haptics'
 
 const NUBANK_LOGO = "https://logodownload.org/wp-content/uploads/2019/08/nubank-logo-2.png"
 
+// Função para reproduzir som de sucesso
+const playSuccessSound = () => {
+  // Usa Web Audio API para gerar som sem precisar de arquivo externo
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const now = audioContext.currentTime;
+    
+    // Cria osciladores para o som
+    const osc1 = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    
+    // Frequências para criar um tom agradável (C maior)
+    osc1.frequency.setValueAtTime(523.25, now); // Dó
+    osc2.frequency.setValueAtTime(659.25, now); // Mi
+    
+    // Configuração de volume
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+    
+    // Conectar e tocar
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.5);
+    osc2.stop(now + 0.5);
+  } catch (e) {
+    console.log('Som não disponível neste navegador');
+  }
+};
+
 export default function InjectionPanel({ 
   selectedOs, 
   selectedGame, 
@@ -76,6 +113,14 @@ export default function InjectionPanel({
 
     loadParticles();
   }, []);
+
+  // Toca som quando o botão final aparece
+  useEffect(() => {
+    if (showFinalButton) {
+      // Pequeno delay para deixar mais fluido
+      setTimeout(() => playSuccessSound(), 100);
+    }
+  }, [showFinalButton]);
 
   return (
     // Container Principal (Tela Inteira)

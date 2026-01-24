@@ -14,7 +14,7 @@ export default function MusicaBoosterFree() {
   const [logs, setLogs] = useState(['> MUSIC_ENGINE_READY', '> BITRATE: 320kbps'])
 
   const handleLogin = () => {
-    if (password.toUpperCase() === "ACESSO-FREE") {
+    if (password.toUpperCase() === "MAJESTIC-FREE") {
       setStep('os')
     } else {
       alert('KEY FREE INVÁLIDA!')
@@ -63,6 +63,15 @@ export default function MusicaBoosterFree() {
       {/* TELA DE LOGIN FREE */}
       {step === 'login' && (
         <div className="flex flex-col h-full items-center justify-center p-8 animate-in fade-in">
+          {/* AVISO DE ATUALIZAÇÃO */}
+          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/40 p-4 rounded-2xl mb-6 shadow-[0_0_30px_rgba(37,99,235,0.2)] animate-pulse">
+            <p className="text-[10px] text-white text-center font-black uppercase tracking-wider leading-relaxed">
+              🔔 VERSÃO GRATUITA ATUALIZADA<br/>
+              <span className="text-blue-400 text-[9px]">Entre em nosso Discord para pegar a nova key</span><br/>
+              <span className="text-blue-300 text-[11px] font-extrabold mt-1 block">(DISCORD.GG/MAJESTICOS)</span>
+            </p>
+          </div>
+
           <div className="w-24 h-24 mb-6 rounded-full bg-blue-600/10 border-2 border-blue-600/30 flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.1)]">
              <img src={MUSIC_ICON} alt="Music Icon" className="w-16 h-16 object-contain" />
           </div>

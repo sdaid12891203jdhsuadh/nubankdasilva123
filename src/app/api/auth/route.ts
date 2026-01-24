@@ -11,6 +11,9 @@ export type HWIDSession = {
   firstSeen: number;
   lastSeen: number;
   ips: Set<string>;
+  ipChanges: number; // Contador de mudanças de IP
+  suspiciousScore: number; // Score de atividade suspeita
+  lastIpChangeTime: number; // Timestamp da última mudança de IP
 };
 
 // Tipo para rastrear usuários únicos por chave
@@ -24,9 +27,12 @@ type UserAccess = {
 const keySessions = new Map<string, HWIDSession>();
 const keyUsageTracking = new Map<string, UserAccess[]>();
 
-const BLOCK_SCORE = 70; // Pontuação para bloqueio
-const FAST_IP_CHANGE_MS = 5 * 60 * 1000; // Tolerância de troca rápida de IP (5 minutos)
-const LEAK_THRESHOLD = 3; // Quantidade de usuários diferentes para alertar
+const BLOCK_SCORE = 100; // Pontuação para bloqueio definitivo
+const FAST_IP_CHANGE_MS = 3 * 60 * 1000; // Mudanças rápidas de IP (3 minutos)
+const NORMAL_IP_CHANGE_MS = 30 * 60 * 1000; // Mudanças normais de IP (30 minutos)
+const LEAK_THRESHOLD = 5; // Quantidade de usuários diferentes para alertar
+const MAX_IP_CHANGES = 5; // Máximo de mudanças de IP permitidas
+const SCORE_DECAY_MS = 24 * 60 * 60 * 1000; // Tempo para reduzir score (24 horas)
 
 /**
  * Função para obter o IP do cliente.
@@ -38,11 +44,16 @@ function getClientIp(req: Request): string {
 
 /**
  * Função para gerar o HWID (identificação única do dispositivo).
+ * HWID agora é baseado apenas no User-Agent, sem incluir IP.
  */
 function generateHWID(req: Request): string {
   const userAgent = req.headers.get('user-agent') || 'unknown';
-  const ip = getClientIp(req); // Usa o IP como parte do HWID para maior exatidão
-  return `${userAgent}-${ip}`;
+  const acceptLanguage = req.headers.get('accept-language') || '';
+  const acceptEncoding = req.headers.get('accept-encoding') || '';
+  
+  // Cria um identificador baseado em características do navegador/dispositivo
+  // mas SEM incluir o IP, permitindo mudanças de rede
+  return `${userAgent}-${acceptLanguage}-${acceptEncoding}`;
 }
 
 /**
@@ -78,6 +89,7 @@ async function notifyDiscord(content: string, fields: Record<string, string>[], 
 
 /**
  * Função para rastrear usuários únicos e detectar vazamento de chave.
+ * Agora considera apenas HWID diferentes, não IP.
  */
 async function trackKeyUsage(key: string, hwid: string, ip: string): Promise<number> {
   if (!keyUsageTracking.has(key)) {
@@ -87,14 +99,15 @@ async function trackKeyUsage(key: string, hwid: string, ip: string): Promise<num
   const usageList = keyUsageTracking.get(key)!;
   const now = Date.now();
 
-  // Busca se esse usuário (HWID + IP) já acessou
-  const existingUser = usageList.find((u) => u.hwid === hwid && u.ip === ip);
+  // Busca se esse HWID já acessou (ignorando IP)
+  const existingUser = usageList.find((u) => u.hwid === hwid);
 
   if (existingUser) {
     // Atualiza último acesso do usuário existente
     existingUser.lastAccess = now;
+    existingUser.ip = ip; // Atualiza o IP atual
   } else {
-    // Novo usuário detectado
+    // Novo HWID detectado (dispositivo diferente)
     usageList.push({
       hwid,
       ip,
@@ -102,14 +115,14 @@ async function trackKeyUsage(key: string, hwid: string, ip: string): Promise<num
       lastAccess: now,
     });
 
-    // Se ultrapassar o limite de usuários diferentes
+    // Se ultrapassar o limite de HWIDs diferentes
     if (usageList.length > LEAK_THRESHOLD) {
       await notifyDiscord(`🔴 VAZAMENTO DE CHAVE DETECTADO! **${key}**`, [
-        { name: '👥 Usuários Diferentes', value: `\`${usageList.length}\`` },
-        { name: '🚨 Novo HWID', value: `\`${hwid}\`` },
-        { name: '📍 Novo IP', value: `\`${ip}\`` },
+        { name: '👥 Dispositivos Diferentes', value: `\`${usageList.length}\`` },
+        { name: '🚨 Novo HWID', value: `\`${hwid.substring(0, 50)}...\`` },
+        { name: '📍 IP Atual', value: `\`${ip}\`` },
         { name: '⏰ Horário', value: new Date().toLocaleString('pt-BR') },
-        { name: '📋 Detalhes', value: `Chave compartilhada entre ${usageList.length} dispositivos/IPs diferentes!` },
+        { name: '📋 Detalhes', value: `Chave compartilhada entre ${usageList.length} dispositivos diferentes!` },
       ], 16711680); // Vermelho (0xFF0000)
     }
   }
@@ -143,10 +156,13 @@ export async function POST(req: Request) {
         firstSeen: now,
         lastSeen: now,
         ips: new Set([ip]),
+        ipChanges: 0,
+        suspiciousScore: 0,
+        lastIpChangeTime: now,
       });
 
       await notifyDiscord(`🔓 Nova Key registrada: **${key}**`, [
-        { name: 'HWID', value: `\`${hwid}\`` },
+        { name: 'HWID', value: `\`${hwid.substring(0, 50)}...\`` },
         { name: 'IP', value: `\`${ip}\`` },
         { name: 'Mensagem', value: 'Key vinculada com sucesso.' },
         { name: 'Horário', value: new Date().toLocaleString('pt-BR') },
@@ -157,64 +173,115 @@ export async function POST(req: Request) {
 
     const session = keySessions.get(key)!;
 
-    // Verificação do HWID
+    // Redução de score ao longo do tempo (perdão por comportamento anterior)
+    const timeSinceLastChange = now - session.lastIpChangeTime;
+    if (timeSinceLastChange > SCORE_DECAY_MS) {
+      session.suspiciousScore = Math.max(0, session.suspiciousScore - 20);
+      session.ipChanges = Math.max(0, session.ipChanges - 1);
+    }
+
+    // Verificação do HWID (dispositivo diferente)
     if (session.hwid !== hwid) {
+      // Aumenta score drasticamente para HWID diferente
+      session.suspiciousScore += 60;
+      
       await notifyDiscord(`🚨 Tentativa de login com HWID diferente: **${key}**`, [
-        { name: 'HWID Novo', value: `\`${hwid}\`` },
-        { name: 'HWID Original', value: `\`${session.hwid}\`` },
+        { name: 'HWID Novo', value: `\`${hwid.substring(0, 50)}...\`` },
+        { name: 'HWID Original', value: `\`${session.hwid.substring(0, 50)}...\`` },
         { name: 'IP', value: `\`${ip}\`` },
-        { name: 'Usuários Diferentes Detectados', value: `\`${uniqueUsers}\`` },
-        { name: 'Mensagem', value: 'Login bloqueado devido a HWID diferente.' },
+        { name: 'Dispositivos Diferentes', value: `\`${uniqueUsers}\`` },
+        { name: 'Score Suspeito', value: `\`${session.suspiciousScore}/100\`` },
+        { name: 'Mensagem', value: session.suspiciousScore >= BLOCK_SCORE ? '🔴 BLOQUEADO' : '⚠️ Monitorando' },
       ]);
+      
+      if (session.suspiciousScore >= BLOCK_SCORE) {
+        return NextResponse.json(
+          { success: false, message: 'Key vinculada a outro dispositivo. Acesso negado.', blocked: true },
+          { status: 403 }
+        );
+      }
+      
+      // Permite primeira tentativa mas avisa
       return NextResponse.json(
-        { success: false, message: 'Key vinculada a outro dispositivo. Acesso negado.' },
+        { success: false, message: 'Dispositivo não reconhecido. Entre em contato com o suporte.' },
         { status: 403 }
       );
     }
 
-    // Verificação de mudanças de IP
+    // Verificação de mudanças de IP (permite trocas de rede WiFi/4G)
     if (!session.ips.has(ip)) {
-      const fastIpChange = now - session.lastSeen < FAST_IP_CHANGE_MS;
-
-      let score = fastIpChange ? 50 : 30; // Aumentar score para mudanças rápidas de IP
-      const reasons = [`IP Novo Detectado: ${ip}`];
-      if (fastIpChange) reasons.push('Troca de IP muito rápida detectada!');
-
-      // Bloqueio por troca agressiva de IPs
-      if (score >= BLOCK_SCORE) {
-        await notifyDiscord(`🚨 Key compartilhada detectada: **${key}** @everyone`, [
+      const timeSinceLastIpChange = now - session.lastIpChangeTime;
+      const isVeryFastChange = timeSinceLastIpChange < FAST_IP_CHANGE_MS;
+      const isFastChange = timeSinceLastIpChange < NORMAL_IP_CHANGE_MS;
+      
+      // Incrementa contador de mudanças de IP
+      session.ipChanges++;
+      session.lastIpChangeTime = now;
+      
+      // Calcula score baseado no padrão de mudanças
+      let changeScore = 0;
+      let changeReason = '';
+      
+      if (isVeryFastChange) {
+        changeScore = 35; // Mudança muito rápida é mais suspeita
+        changeReason = '⚠️ Troca de rede muito rápida (< 3 min)';
+      } else if (isFastChange) {
+        changeScore = 15; // Mudança rápida moderada
+        changeReason = '✓ Troca de rede rápida (< 30 min)';
+      } else {
+        changeScore = 5; // Mudança normal (pode ser WiFi -> 4G ao sair de casa)
+        changeReason = '✓ Troca de rede normal';
+      }
+      
+      // Aumenta score se houver muitas mudanças
+      if (session.ipChanges > MAX_IP_CHANGES) {
+        changeScore += 30;
+        changeReason += ' | Muitas mudanças detectadas';
+      }
+      
+      session.suspiciousScore += changeScore;
+      
+      // Verifica se deve bloquear
+      if (session.suspiciousScore >= BLOCK_SCORE) {
+        await notifyDiscord(`🚨 Key BLOQUEADA por atividade suspeita: **${key}** @everyone`, [
           { name: 'IP Novo', value: `\`${ip}\`` },
           { name: 'IP Original', value: `\`${session.firstIp}\`` },
-          { name: 'HWID', value: `\`${session.hwid}\`` },
-          { name: 'Usuários Diferentes', value: `\`${uniqueUsers}\`` },
-          { name: 'Mensagem', value: 'Key BLOQUEADA devido a compartilhamento.' },
-          { name: 'Score de Risco', value: `\`${score}/100\`` },
-        ]);
-        return NextResponse.json({ success: false, message: 'A Key foi bloqueada: atividade suspeita.', blocked: true }, { status: 403 });
+          { name: 'Total de IPs', value: `\`${session.ips.size + 1}\`` },
+          { name: 'Mudanças de IP', value: `\`${session.ipChanges}\`` },
+          { name: 'Score Final', value: `\`${session.suspiciousScore}/100\`` },
+          { name: 'Dispositivos Diferentes', value: `\`${uniqueUsers}\`` },
+          { name: 'Razão', value: changeReason },
+          { name: 'Status', value: '🔴 BLOQUEADO' },
+        ], 16711680); // Vermelho
+        
+        return NextResponse.json({ 
+          success: false, 
+          message: 'Key bloqueada por atividade suspeita. Entre em contato com o suporte.', 
+          blocked: true 
+        }, { status: 403 });
       }
-
-      // Atualiza mudanças de sessões com um aviso
+      
+      // Adiciona o novo IP
       session.ips.add(ip);
       session.lastSeen = now;
-
-      await notifyDiscord(`⚠️ Tentativa de login com IP diferente: **${key}**`, [
+      
+      // Notifica mudança de IP (mas permite acesso)
+      const emoji = session.suspiciousScore > 50 ? '⚠️' : '📱';
+      const color = session.suspiciousScore > 50 ? 16776960 : 3447003; // Amarelo ou Azul
+      
+      await notifyDiscord(`${emoji} Mudança de rede detectada: **${key}**`, [
         { name: 'IP Novo', value: `\`${ip}\`` },
         { name: 'IP Original', value: `\`${session.firstIp}\`` },
-        { name: 'Usuários Diferentes Detectados', value: `\`${uniqueUsers}\`` },
-        { name: 'Mensagem', value: 'Key ainda funcional, mas IP novo detectado.' },
-      ]);
+        { name: 'Total de IPs', value: `\`${session.ips.size}\`` },
+        { name: 'Mudanças de IP', value: `\`${session.ipChanges}/${MAX_IP_CHANGES}\`` },
+        { name: 'Score Atual', value: `\`${session.suspiciousScore}/100\`` },
+        { name: 'Razão', value: changeReason },
+        { name: 'Status', value: '✅ Acesso permitido' },
+      ], color);
+      
     } else {
-      // Atualiza o último login
+      // Mesmo IP, atualiza apenas o timestamp
       session.lastSeen = now;
-
-      // Log de acesso bem-sucedido com mesmo HWID e IP
-      await notifyDiscord(`✅ Login bem-sucedido: **${key}**`, [
-        { name: 'HWID', value: `\`${hwid}\`` },
-        { name: 'IP', value: `\`${ip}\`` },
-        { name: 'Usuários Diferentes Detectados', value: `\`${uniqueUsers}\`` },
-        { name: 'Mensagem', value: 'Acesso autorizado.' },
-        { name: 'Horário', value: new Date().toLocaleString('pt-BR') },
-      ], 65280); // Verde (0x00FF00)
     }
 
     return NextResponse.json({ success: true, message: 'Autenticado com sucesso.' });

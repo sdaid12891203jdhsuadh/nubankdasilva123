@@ -4,6 +4,16 @@ import { NextResponse } from 'next/server';
 const discordWebhookBase64 = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTM5ODg0MzUwODUyNTI0MDQzMy9TeVc2NjAtLUpkWW9NNUxTSVlSXzIxQkVPanBudThyZ3pwMW42WmVBdXZlMWtRRmRhVkhkaFB5VzQ5Z2FqRHdGNGNRSA==';
 const discordWebhookUrl = Buffer.from(discordWebhookBase64, 'base64').toString('utf-8');
 
+// Tipo para armazenar informações de localização de IP
+type IpLocation = {
+  ip: string;
+  city: string;
+  region: string;
+  country: string;
+  firstSeen: number;
+  lastSeen: number;
+};
+
 // Configuração da Key
 export type HWIDSession = {
   hwid: string;
@@ -11,6 +21,7 @@ export type HWIDSession = {
   firstSeen: number;
   lastSeen: number;
   ips: Set<string>;
+  ipLocations: Map<string, IpLocation>; // Histórico de localizações
   ipChanges: number; // Contador de mudanças de IP
   suspiciousScore: number; // Score de atividade suspeita
   lastIpChangeTime: number; // Timestamp da última mudança de IP
@@ -54,6 +65,42 @@ function generateHWID(req: Request): string {
   // Cria um identificador baseado em características do navegador/dispositivo
   // mas SEM incluir o IP, permitindo mudanças de rede
   return `${userAgent}-${acceptLanguage}-${acceptEncoding}`;
+}
+
+/**
+ * Função para buscar a localização de um IP usando API gratuita.
+ */
+async function getIpLocation(ip: string): Promise<{ city: string; region: string; country: string }> {
+  if (ip === 'unknown' || ip === '127.0.0.1' || ip === 'localhost') {
+    return { city: 'Desconhecido', region: 'Desconhecido', country: 'Desconhecido' };
+  }
+
+  try {
+    // Usa ip-api.com (gratuito, sem necessidade de chave)
+    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      return { city: 'Não disponível', region: 'Não disponível', country: 'Não disponível' };
+    }
+
+    const data = await response.json();
+    
+    if (data.status === 'success') {
+      return {
+        city: data.city || 'Desconhecido',
+        region: data.regionName || 'Desconhecido',
+        country: data.country || 'Desconhecido',
+      };
+    }
+
+    return { city: 'Não disponível', region: 'Não disponível', country: 'Não disponível' };
+  } catch (error) {
+    console.error('Erro ao buscar localização do IP:', error);
+    return { city: 'Erro', region: 'Erro', country: 'Erro' };
+  }
 }
 
 /**
@@ -150,12 +197,26 @@ export async function POST(req: Request) {
 
     // Processamento de uma nova Key
     if (!keySessions.has(key)) {
+      // Busca localização do primeiro IP
+      const location = await getIpLocation(ip);
+      
+      const ipLocations = new Map<string, IpLocation>();
+      ipLocations.set(ip, {
+        ip,
+        city: location.city,
+        region: location.region,
+        country: location.country,
+        firstSeen: now,
+        lastSeen: now,
+      });
+
       keySessions.set(key, {
         hwid,
         firstIp: ip,
         firstSeen: now,
         lastSeen: now,
         ips: new Set([ip]),
+        ipLocations,
         ipChanges: 0,
         suspiciousScore: 0,
         lastIpChangeTime: now,
@@ -163,7 +224,8 @@ export async function POST(req: Request) {
 
       await notifyDiscord(`🔓 Nova Key registrada: **${key}**`, [
         { name: 'HWID', value: `\`${hwid.substring(0, 50)}...\`` },
-        { name: 'IP', value: `\`${ip}\`` },
+        { name: '📍 IP', value: `\`${ip}\`` },
+        { name: '🌍 Localização', value: `\`${location.city}, ${location.region} - ${location.country}\`` },
         { name: 'Mensagem', value: 'Key vinculada com sucesso.' },
         { name: 'Horário', value: new Date().toLocaleString('pt-BR') },
       ]);
@@ -185,10 +247,20 @@ export async function POST(req: Request) {
       // Aumenta score drasticamente para HWID diferente
       session.suspiciousScore += 60;
       
+      // Busca localização do IP atual
+      const currentLocation = await getIpLocation(ip);
+      
+      // Cria lista de IPs registrados com localização
+      const ipsList = Array.from(session.ipLocations.values())
+        .map((loc, index) => `${index + 1}. \`${loc.ip}\` - ${loc.city}, ${loc.country}`)
+        .join('\n');
+      
       await notifyDiscord(`🚨 Tentativa de login com HWID diferente: **${key}**`, [
         { name: 'HWID Novo', value: `\`${hwid.substring(0, 50)}...\`` },
         { name: 'HWID Original', value: `\`${session.hwid.substring(0, 50)}...\`` },
-        { name: 'IP', value: `\`${ip}\`` },
+        { name: '📍 IP Atual', value: `\`${ip}\`` },
+        { name: '🌍 Localização Atual', value: `\`${currentLocation.city}, ${currentLocation.region} - ${currentLocation.country}\`` },
+        { name: '📋 IPs Registrados Nesta Key', value: ipsList || 'Nenhum' },
         { name: 'Dispositivos Diferentes', value: `\`${uniqueUsers}\`` },
         { name: 'Score Suspeito', value: `\`${session.suspiciousScore}/100\`` },
         { name: 'Mensagem', value: session.suspiciousScore >= BLOCK_SCORE ? '🔴 BLOQUEADO' : '⚠️ Monitorando' },
@@ -213,6 +285,9 @@ export async function POST(req: Request) {
       const timeSinceLastIpChange = now - session.lastIpChangeTime;
       const isVeryFastChange = timeSinceLastIpChange < FAST_IP_CHANGE_MS;
       const isFastChange = timeSinceLastIpChange < NORMAL_IP_CHANGE_MS;
+      
+      // Busca localização do novo IP
+      const newLocation = await getIpLocation(ip);
       
       // Incrementa contador de mudanças de IP
       session.ipChanges++;
@@ -243,9 +318,16 @@ export async function POST(req: Request) {
       
       // Verifica se deve bloquear
       if (session.suspiciousScore >= BLOCK_SCORE) {
+        // Cria lista de todos os IPs com localização
+        const ipsList = Array.from(session.ipLocations.values())
+          .map((loc, index) => `${index + 1}. \`${loc.ip}\` - ${loc.city}, ${loc.country}`)
+          .join('\n');
+
         await notifyDiscord(`🚨 Key BLOQUEADA por atividade suspeita: **${key}** @everyone`, [
-          { name: 'IP Novo', value: `\`${ip}\`` },
+          { name: '🆕 IP Novo', value: `\`${ip}\`` },
+          { name: '🌍 Localização Nova', value: `\`${newLocation.city}, ${newLocation.region} - ${newLocation.country}\`` },
           { name: 'IP Original', value: `\`${session.firstIp}\`` },
+          { name: '📋 Todos os IPs Registrados', value: ipsList + `\n**→ ${session.ips.size + 1}. \`${ip}\` - ${newLocation.city}, ${newLocation.country}** ⚠️ NOVO` },
           { name: 'Total de IPs', value: `\`${session.ips.size + 1}\`` },
           { name: 'Mudanças de IP', value: `\`${session.ipChanges}\`` },
           { name: 'Score Final', value: `\`${session.suspiciousScore}/100\`` },
@@ -261,17 +343,37 @@ export async function POST(req: Request) {
         }, { status: 403 });
       }
       
-      // Adiciona o novo IP
+      // Adiciona o novo IP com localização ao histórico
       session.ips.add(ip);
+      session.ipLocations.set(ip, {
+        ip,
+        city: newLocation.city,
+        region: newLocation.region,
+        country: newLocation.country,
+        firstSeen: now,
+        lastSeen: now,
+      });
       session.lastSeen = now;
+      
+      // Cria lista de todos os IPs com destaque no atual
+      const ipsList = Array.from(session.ipLocations.values())
+        .map((loc, index) => {
+          const isCurrentIp = loc.ip === ip;
+          return isCurrentIp 
+            ? `**→ ${index + 1}. \`${loc.ip}\` - ${loc.city}, ${loc.country}** ⚡ ATUAL`
+            : `${index + 1}. \`${loc.ip}\` - ${loc.city}, ${loc.country}`;
+        })
+        .join('\n');
       
       // Notifica mudança de IP (mas permite acesso)
       const emoji = session.suspiciousScore > 50 ? '⚠️' : '📱';
       const color = session.suspiciousScore > 50 ? 16776960 : 3447003; // Amarelo ou Azul
       
       await notifyDiscord(`${emoji} Mudança de rede detectada: **${key}**`, [
-        { name: 'IP Novo', value: `\`${ip}\`` },
+        { name: '🆕 IP Novo', value: `\`${ip}\`` },
+        { name: '🌍 Localização Nova', value: `\`${newLocation.city}, ${newLocation.region} - ${newLocation.country}\`` },
         { name: 'IP Original', value: `\`${session.firstIp}\`` },
+        { name: '📋 Histórico de IPs Desta Key', value: ipsList },
         { name: 'Total de IPs', value: `\`${session.ips.size}\`` },
         { name: 'Mudanças de IP', value: `\`${session.ipChanges}/${MAX_IP_CHANGES}\`` },
         { name: 'Score Atual', value: `\`${session.suspiciousScore}/100\`` },
@@ -282,6 +384,12 @@ export async function POST(req: Request) {
     } else {
       // Mesmo IP, atualiza apenas o timestamp
       session.lastSeen = now;
+      
+      // Atualiza também o lastSeen na localização
+      const existingLocation = session.ipLocations.get(ip);
+      if (existingLocation) {
+        existingLocation.lastSeen = now;
+      }
     }
 
     return NextResponse.json({ success: true, message: 'Autenticado com sucesso.' });

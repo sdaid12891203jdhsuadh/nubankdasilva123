@@ -7,7 +7,7 @@ export const playBackgroundMusic = () => {
   audioElement = new Audio();
   audioElement.id = 'bg-music';
   audioElement.loop = true;
-  audioElement.volume = 0.25;
+  audioElement.volume = 0.12;
   
   // Usa a música local da pasta public
   audioElement.src = '/musica.mp3';

@@ -244,18 +244,61 @@ export async function POST(req: Request) {
 
     // Verificação do HWID (dispositivo diferente)
     if (session.hwid !== hwid) {
-      // Aumenta score drasticamente para HWID diferente
-      session.suspiciousScore += 60;
-      
       // Busca localização do IP atual
       const currentLocation = await getIpLocation(ip);
+      
+      // Verifica se alguma localização registrada está na MESMA CIDADE
+      const locationsArray = Array.from(session.ipLocations.values());
+      const isSameCity = locationsArray.some(
+        (loc) => loc.city.toLowerCase() === currentLocation.city.toLowerCase() && 
+                 loc.country.toLowerCase() === currentLocation.country.toLowerCase()
+      );
+      
+      // Se for da MESMA CIDADE, permite acesso sem aumentar score
+      if (isSameCity) {
+        // Atualiza HWID para o novo dispositivo (permite troca de dispositivo na mesma cidade)
+        session.hwid = hwid;
+        
+        // Adiciona o IP se não existir
+        if (!session.ips.has(ip)) {
+          session.ips.add(ip);
+          session.ipLocations.set(ip, {
+            ip,
+            city: currentLocation.city,
+            region: currentLocation.region,
+            country: currentLocation.country,
+            firstSeen: now,
+            lastSeen: now,
+          });
+        }
+        
+        // Cria lista de IPs registrados
+        const ipsList = Array.from(session.ipLocations.values())
+          .map((loc, index) => `${index + 1}. \`${loc.ip}\` - ${loc.city}, ${loc.country}`)
+          .join('\n');
+        
+        await notifyDiscord(`✅ Troca de dispositivo na MESMA CIDADE permitida: **${key}**`, [
+          { name: 'HWID Novo', value: `\`${hwid.substring(0, 50)}...\`` },
+          { name: 'HWID Anterior', value: `\`${session.hwid.substring(0, 50)}...\`` },
+          { name: '📍 IP Atual', value: `\`${ip}\`` },
+          { name: '🌍 Localização', value: `\`${currentLocation.city}, ${currentLocation.region} - ${currentLocation.country}\`` },
+          { name: '📋 IPs Registrados', value: ipsList || 'Nenhum' },
+          { name: 'Score Suspeito', value: `\`${session.suspiciousScore}/100\`` },
+          { name: 'Mensagem', value: '✅ Acesso liberado - Mesma cidade detectada' },
+        ], 5763719); // Verde
+        
+        return NextResponse.json({ success: true, message: 'Autenticado com sucesso.' });
+      }
+      
+      // Se for de cidade DIFERENTE, aumenta score drasticamente
+      session.suspiciousScore += 60;
       
       // Cria lista de IPs registrados com localização
       const ipsList = Array.from(session.ipLocations.values())
         .map((loc, index) => `${index + 1}. \`${loc.ip}\` - ${loc.city}, ${loc.country}`)
         .join('\n');
       
-      await notifyDiscord(`🚨 Tentativa de login com HWID diferente: **${key}**`, [
+      await notifyDiscord(`🚨 Tentativa de login com HWID diferente de CIDADE DIFERENTE: **${key}**`, [
         { name: 'HWID Novo', value: `\`${hwid.substring(0, 50)}...\`` },
         { name: 'HWID Original', value: `\`${session.hwid.substring(0, 50)}...\`` },
         { name: '📍 IP Atual', value: `\`${ip}\`` },
@@ -289,6 +332,13 @@ export async function POST(req: Request) {
       // Busca localização do novo IP
       const newLocation = await getIpLocation(ip);
       
+      // Verifica se o novo IP está na MESMA CIDADE que qualquer IP registrado
+      const locationsArray = Array.from(session.ipLocations.values());
+      const isSameCity = locationsArray.some(
+        (loc) => loc.city.toLowerCase() === newLocation.city.toLowerCase() && 
+                 loc.country.toLowerCase() === newLocation.country.toLowerCase()
+      );
+      
       // Incrementa contador de mudanças de IP
       session.ipChanges++;
       session.lastIpChangeTime = now;
@@ -297,19 +347,23 @@ export async function POST(req: Request) {
       let changeScore = 0;
       let changeReason = '';
       
-      if (isVeryFastChange) {
-        changeScore = 35; // Mudança muito rápida é mais suspeita
-        changeReason = '⚠️ Troca de rede muito rápida (< 3 min)';
+      if (isSameCity) {
+        // Se for na MESMA CIDADE, score muito baixo (provavelmente WiFi -> 4G legítimo)
+        changeScore = 2;
+        changeReason = '✅ Troca de rede na mesma cidade (normal)';
+      } else if (isVeryFastChange) {
+        changeScore = 35; // Mudança muito rápida de CIDADE é muito suspeita
+        changeReason = '⚠️ Troca de cidade muito rápida (< 3 min)';
       } else if (isFastChange) {
-        changeScore = 15; // Mudança rápida moderada
-        changeReason = '✓ Troca de rede rápida (< 30 min)';
+        changeScore = 15; // Mudança rápida de cidade é suspeita
+        changeReason = '⚠️ Troca de cidade rápida (< 30 min)';
       } else {
-        changeScore = 5; // Mudança normal (pode ser WiFi -> 4G ao sair de casa)
-        changeReason = '✓ Troca de rede normal';
+        changeScore = 5; // Mudança normal de cidade
+        changeReason = '⚠️ Troca de cidade detectada';
       }
       
-      // Aumenta score se houver muitas mudanças
-      if (session.ipChanges > MAX_IP_CHANGES) {
+      // Aumenta score se houver muitas mudanças (só se NÃO for mesma cidade)
+      if (session.ipChanges > MAX_IP_CHANGES && !isSameCity) {
         changeScore += 30;
         changeReason += ' | Muitas mudanças detectadas';
       }
@@ -366,10 +420,11 @@ export async function POST(req: Request) {
         .join('\n');
       
       // Notifica mudança de IP (mas permite acesso)
-      const emoji = session.suspiciousScore > 50 ? '⚠️' : '📱';
-      const color = session.suspiciousScore > 50 ? 16776960 : 3447003; // Amarelo ou Azul
+      const emoji = isSameCity ? '✅' : (session.suspiciousScore > 50 ? '⚠️' : '📱');
+      const color = isSameCity ? 5763719 : (session.suspiciousScore > 50 ? 16776960 : 3447003); // Verde, Amarelo ou Azul
+      const titlePrefix = isSameCity ? '✅ Troca de rede na mesma cidade' : '📱 Mudança de rede detectada';
       
-      await notifyDiscord(`${emoji} Mudança de rede detectada: **${key}**`, [
+      await notifyDiscord(`${titlePrefix}: **${key}**`, [
         { name: '🆕 IP Novo', value: `\`${ip}\`` },
         { name: '🌍 Localização Nova', value: `\`${newLocation.city}, ${newLocation.region} - ${newLocation.country}\`` },
         { name: 'IP Original', value: `\`${session.firstIp}\`` },
